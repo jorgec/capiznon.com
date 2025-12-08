@@ -15,6 +15,7 @@
     <!-- PWA manifest & theme color -->
     <link rel="manifest" href="<?php echo esc_url( get_template_directory_uri() . '/manifest.webmanifest' ); ?>">
     <meta name="theme-color" content="#f59e0b">
+    <link rel="icon" href="https://s.w.org/images/core/emoji/17.0.2/svg/1f3dd.svg" type="image/svg+xml">
     
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
