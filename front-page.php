@@ -50,8 +50,9 @@ $user_name = $current_user->ID ? $current_user->display_name : __('Explorer', 'c
             <input 
                 type="search" 
                 id="cg-search" 
-                placeholder="<?php esc_attr_e('Search for places...', 'capiznon-geo'); ?>"
+                placeholder="<?php esc_attr_e('         Search for places...', 'capiznon-geo'); ?>"
                 class="w-full pl-10 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-gray-300 focus:bg-white transition-colors placeholder:text-gray-400"
+                style="padding-left: 32px;"
             >
             <div class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
