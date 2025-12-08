@@ -71,7 +71,7 @@ $user_name = $current_user->ID ? $current_user->display_name : __('Explorer', 'c
                 View all
             </a>
         </div>
-        <div class="flex gap-4 overflow-x-auto pb-2">
+        <div class="flex gap-4 overflow-x-auto pb-4">
             <button type="button" data-type="" class="cg-category-btn active flex flex-col items-center gap-2 flex-shrink-0">
                 <div class="w-14 h-14 bg-gray-900 rounded-xl flex items-center justify-center transition-colors">
                     <span class="text-xl text-white">✨</span>
@@ -121,7 +121,7 @@ $user_name = $current_user->ID ? $current_user->display_name : __('Explorer', 'c
     </section>
 
     <!-- Featured Section -->
-    <section id="cg-featured-section" class="mb-12">
+    <section id="cg-featured-section" class="mb-12 mt-4">
         <div class="px-4 flex items-center justify-between mb-4">
             <h2 class="text-base font-medium text-gray-900">
                 Featured
@@ -130,7 +130,7 @@ $user_name = $current_user->ID ? $current_user->display_name : __('Explorer', 'c
                 View all
             </a>
         </div>
-        <div id="cg-featured-carousel" class="cg-carousel">
+        <div id="cg-featured-carousel" class="cg-carousel mt-4">
             <?php
             $featured = new WP_Query([
                 'post_type' => 'cg_location',
@@ -161,7 +161,7 @@ $user_name = $current_user->ID ? $current_user->display_name : __('Explorer', 'c
     </section>
 
     <!-- Food Section -->
-    <section id="cg-food-section" class="mb-14">
+    <section id="cg-food-section" class="mb-14 mt-4">
         <div class="px-6 sm:px-8 lg:px-12 flex items-center justify-between mb-5">
             <h2 class="text-sm font-semibold text-stone-500 uppercase tracking-wider flex items-center gap-2">
                 <span>🍽️</span>
@@ -203,7 +203,7 @@ $user_name = $current_user->ID ? $current_user->display_name : __('Explorer', 'c
     </section>
 
     <!-- Stay Section -->
-    <section id="cg-stay-section" class="mb-14">
+    <section id="cg-stay-section" class="mb-14 mt-4">
         <div class="px-6 sm:px-8 lg:px-12 flex items-center justify-between mb-5">
             <h2 class="text-sm font-semibold text-stone-500 uppercase tracking-wider flex items-center gap-2">
                 <span>🏨</span>
@@ -245,7 +245,7 @@ $user_name = $current_user->ID ? $current_user->display_name : __('Explorer', 'c
     </section>
 
     <!-- See Section -->
-    <section id="cg-see-section" class="mb-14">
+    <section id="cg-see-section" class="mb-14 mt-4">
         <div class="px-6 sm:px-8 lg:px-12 flex items-center justify-between mb-5">
             <h2 class="text-sm font-semibold text-stone-500 uppercase tracking-wider flex items-center gap-2">
                 <span>⭐</span>
@@ -287,7 +287,7 @@ $user_name = $current_user->ID ? $current_user->display_name : __('Explorer', 'c
     </section>
 
     <!-- Shop Section -->
-    <section id="cg-shop-section" class="mb-14">
+    <section id="cg-shop-section" class="mb-14 mt-4">
         <div class="px-6 sm:px-8 lg:px-12 flex items-center justify-between mb-5">
             <h2 class="text-sm font-semibold text-stone-500 uppercase tracking-wider flex items-center gap-2">
                 <span>🛍️</span>

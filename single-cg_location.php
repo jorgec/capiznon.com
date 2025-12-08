@@ -64,7 +64,7 @@ while (have_posts()) : the_post();
             </nav>
 
             <!-- Type & Cuisine Badges -->
-            <div class="flex flex-wrap gap-2 mb-4">
+            <div class="hidden lg:flex flex-wrap gap-2 mb-4">
                 <?php 
                 $types = get_the_terms(get_the_ID(), 'location_type');
                 if ($types && !is_wp_error($types)) : 
@@ -137,6 +137,45 @@ while (have_posts()) : the_post();
                     </h2>
                     <div class="prose prose-lg prose-amber max-w-none relative z-10">
                         <?php the_content(); ?>
+                    </div>
+                    
+                    <!-- Mobile Metadata (Types, Cuisine, Price) -->
+                    <div class="lg:hidden flex flex-wrap gap-2 mt-6 pb-6 border-b border-amber-100">
+                        <?php 
+                        // Ensure types is set for this block
+                        $types = isset($types) ? $types : get_the_terms(get_the_ID(), 'location_type');
+                        
+                        if ($types && !is_wp_error($types)) : 
+                            foreach ($types as $type) :
+                        ?>
+                            <span class="inline-flex items-center px-4 py-2 rounded-full text-sm font-medium bg-white/90 text-amber-900 backdrop-blur-sm border border-amber-200">
+                                <span class="mr-2">🌴</span>
+                                <?php echo esc_html($type->name); ?>
+                            </span>
+                        <?php 
+                            endforeach;
+                        endif;
+                        
+                        if ($cuisines && !is_wp_error($cuisines)) :
+                            foreach ($cuisines as $cuisine) :
+                        ?>
+                            <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-rose-100/80 text-rose-800 backdrop-blur-sm">
+                                <?php echo esc_html($cuisine->name); ?>
+                            </span>
+                        <?php 
+                            endforeach;
+                        endif;
+                        
+                        if ($price && !is_wp_error($price)) :
+                            foreach ($price as $price_term) :
+                        ?>
+                            <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-green-100/80 text-green-800 backdrop-blur-sm">
+                                <?php echo esc_html($price_term->name); ?>
+                            </span>
+                        <?php 
+                            endforeach;
+                        endif;
+                        ?>
                     </div>
                     
                     <!-- Enhanced Tags -->

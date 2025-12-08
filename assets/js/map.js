@@ -6,6 +6,14 @@
 (function() {
     'use strict';
 
+    // Fix Leaflet default icon paths (in case default markers are used or fallback occurs)
+    delete L.Icon.Default.prototype._getIconUrl;
+    L.Icon.Default.mergeOptions({
+        iconRetinaUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-icon-2x.png',
+        iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-icon.png',
+        shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png',
+    });
+
     // Map instance
     let map = null;
     let markersLayer = null;
@@ -156,7 +164,7 @@
         let html = '<div class="cg-popup">';
         
         if (thumbnail) {
-            html += `<img src="${thumbnail}" alt="${location.title}" class="cg-popup-image">`;
+            html += `<img src="${thumbnail}" alt="${location.title}" class="cg-popup-image" onerror="this.style.display='none'">`;
         }
         
         html += '<div class="cg-popup-content">';
