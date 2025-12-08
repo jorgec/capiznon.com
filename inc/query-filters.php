@@ -52,9 +52,18 @@ function capiznon_geo_filter_archive_query($query) {
         $has_tax_changes = true;
     }
 
-    // Handle Tag/Amenities
-    if (isset($_GET['tag']) && !empty($_GET['tag'])) {
+    // Handle Tag/Amenities (support both ?amenity= and legacy ?tag= to avoid WP post_tag conflicts)
+    $tag = null;
+    if (isset($_GET['amenity']) && !empty($_GET['amenity'])) {
+        $tag = sanitize_text_field($_GET['amenity']);
+    } elseif (isset($_GET['tag']) && !empty($_GET['tag'])) {
+        // Map the WP reserved "tag" query var to our custom taxonomy
         $tag = sanitize_text_field($_GET['tag']);
+        $query->set('tag', '');
+        $query->set('tag_id', '');
+    }
+
+    if ($tag) {
         $tax_query[] = [
             'taxonomy' => 'location_tag',
             'field'    => 'slug',

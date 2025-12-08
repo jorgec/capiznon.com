@@ -22,17 +22,56 @@ get_header();
         
         <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="text-center">
-                <h1 class="text-4xl md:text-5xl font-bold mb-3 drop-shadow-lg">
-                    🌴 <?php esc_html_e('Locations in Capiz', 'capiznon-geo'); ?> 🌴
-                </h1>
-                <p class="text-amber-50 text-xl max-w-2xl mx-auto">
-                    <?php 
-                    printf(
-                        esc_html__('Explore %d places in Capiz', 'capiznon-geo'),
-                        wp_count_posts('cg_location')->publish
-                    );
-                    ?>
-                </p>
+                <?php
+                // Check for active filters
+                $active_filters = [];
+                if (!empty($_GET['amenity'])) {
+                    $tag_term = get_term_by('slug', sanitize_text_field($_GET['amenity']), 'location_tag');
+                    if ($tag_term) $active_filters[] = $tag_term->name;
+                }
+                if (!empty($_GET['type'])) {
+                    $type_term = get_term_by('slug', sanitize_text_field($_GET['type']), 'location_type');
+                    if ($type_term) $active_filters[] = $type_term->name;
+                }
+                if (!empty($_GET['area'])) {
+                    $area_term = get_term_by('slug', sanitize_text_field($_GET['area']), 'location_area');
+                    if ($area_term) $active_filters[] = $area_term->name;
+                }
+                if (!empty($_GET['cuisine'])) {
+                    $cuisine_term = get_term_by('slug', sanitize_text_field($_GET['cuisine']), 'location_cuisine');
+                    if ($cuisine_term) $active_filters[] = $cuisine_term->name;
+                }
+                if (!empty($_GET['search'])) {
+                    $active_filters[] = '"' . esc_html(sanitize_text_field($_GET['search'])) . '"';
+                }
+                ?>
+                
+                <?php if (!empty($active_filters)) : ?>
+                    <p class="text-amber-100 text-sm uppercase tracking-wider mb-2">Filtered by</p>
+                    <h1 class="text-4xl md:text-5xl font-bold mb-3 drop-shadow-lg">
+                        <?php echo esc_html(implode(' + ', $active_filters)); ?>
+                    </h1>
+                    <p class="text-amber-50 text-xl max-w-2xl mx-auto">
+                        <?php 
+                        printf(
+                            esc_html(_n('%d location found', '%d locations found', $wp_query->found_posts, 'capiznon-geo')),
+                            $wp_query->found_posts
+                        );
+                        ?>
+                    </p>
+                <?php else : ?>
+                    <h1 class="text-4xl md:text-5xl font-bold mb-3 drop-shadow-lg">
+                        🌴 <?php esc_html_e('Locations in Capiz', 'capiznon-geo'); ?> 🌴
+                    </h1>
+                    <p class="text-amber-50 text-xl max-w-2xl mx-auto">
+                        <?php 
+                        printf(
+                            esc_html__('Explore %d places in Capiz', 'capiznon-geo'),
+                            wp_count_posts('cg_location')->publish
+                        );
+                        ?>
+                    </p>
+                <?php endif; ?>
             </div>
         </div>
     </div>
@@ -49,7 +88,7 @@ get_header();
                             <?php esc_html_e('Filter Locations', 'capiznon-geo'); ?>
                         </h2>
                         <p class="text-sm text-white/70 mt-0.5">
-                            <span id="cg-location-count" class="font-semibold text-white">0</span>
+                            <span id="cg-location-count" class="font-semibold text-white"><?php echo $wp_query->found_posts; ?></span>
                             <?php esc_html_e('locations found', 'capiznon-geo'); ?>
                         </p>
                     </div>
@@ -363,7 +402,7 @@ document.addEventListener('DOMContentLoaded', function() {
         if (search) params.set('search', search);
         if (typeFilter) params.set('type', typeFilter);
         if (area) params.set('area', area);
-        if (tag) params.set('tag', tag);
+        if (tag) params.set('amenity', tag);
         if (price) params.set('price', price);
         if (cuisine) params.set('cuisine', cuisine);
         if (featured) params.set('featured', featured);
@@ -380,6 +419,62 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Load filter options from API (same as front page)
     loadFilterOptions();
+
+    // Initialize filters from URL parameters
+    initFiltersFromURL();
+
+    function initFiltersFromURL() {
+        const params = new URLSearchParams(window.location.search);
+        
+        // Set search input
+        if (params.get('search') && searchInput) {
+            searchInput.value = params.get('search');
+        }
+        
+        // Set type button active state
+        const typeParam = params.get('type');
+        if (typeParam) {
+            document.querySelectorAll('.cg-type-btn').forEach(b => {
+                b.classList.remove('active', 'bg-gradient-to-r', 'from-amber-500', 'to-orange-500', 'text-white');
+                b.classList.add('bg-white/80', 'text-amber-800', 'border', 'border-amber-200');
+            });
+            const activeBtn = document.querySelector(`.cg-type-btn[data-type="${typeParam}"]`);
+            if (activeBtn) {
+                activeBtn.classList.add('active', 'bg-gradient-to-r', 'from-amber-500', 'to-orange-500', 'text-white');
+                activeBtn.classList.remove('bg-white/80', 'text-amber-800', 'border', 'border-amber-200');
+            }
+        }
+        
+        // Set select filters after options are loaded
+        setTimeout(() => {
+            if (params.get('type')) {
+                const typeSelect = document.getElementById('cg-filter-type');
+                if (typeSelect) typeSelect.value = params.get('type');
+            }
+            if (params.get('area')) {
+                const areaSelect = document.getElementById('cg-filter-area');
+                if (areaSelect) areaSelect.value = params.get('area');
+            }
+            if (params.get('amenity')) {
+                const tagSelect = document.getElementById('cg-filter-tag');
+                if (tagSelect) tagSelect.value = params.get('amenity');
+            }
+            if (params.get('price')) {
+                const priceSelect = document.getElementById('cg-filter-price');
+                if (priceSelect) priceSelect.value = params.get('price');
+            }
+            if (params.get('cuisine')) {
+                const cuisineSelect = document.getElementById('cg-filter-cuisine');
+                if (cuisineSelect) cuisineSelect.value = params.get('cuisine');
+                // Show cuisine wrapper if cuisine is set
+                if (cuisineWrapper) cuisineWrapper.classList.remove('hidden');
+            }
+            if (params.get('featured') === '1') {
+                const featuredCheck = document.getElementById('cg-filter-featured');
+                if (featuredCheck) featuredCheck.checked = true;
+            }
+        }, 500);
+    }
 
     async function loadFilterOptions() {
         try {
