@@ -22,6 +22,15 @@ while (have_posts()) : the_post();
     $areas = get_the_terms(get_the_ID(), 'location_area');
     $price = get_the_terms(get_the_ID(), 'location_price');
     $tags = get_the_terms(get_the_ID(), 'location_tag');
+    
+    // Marker details
+    $marker_color = get_post_meta(get_the_ID(), '_cg_marker_color', true) ?: '#f59e0b';
+    $marker_icon_key = get_post_meta(get_the_ID(), '_cg_marker_icon', true) ?: 'default';
+    $icons = [
+        'default' => '📍', 'restaurant' => '🍽️', 'cafe' => '☕', 'bar' => '🍺',
+        'hotel' => '🏨', 'shop' => '🛍️', 'attraction' => '⭐', 'beach' => '🏖️', 'church' => '⛪'
+    ];
+    $marker_icon = $icons[$marker_icon_key] ?? '📍';
 ?>
 
 <main id="main" class="flex-1 bg-gradient-to-br from-orange-50 via-amber-50 to-yellow-50">
@@ -226,7 +235,20 @@ while (have_posts()) : the_post();
                             L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
                                 attribution: '&copy; OpenStreetMap'
                             }).addTo(map);
-                            L.marker([<?php echo esc_js($lat); ?>, <?php echo esc_js($lng); ?>]).addTo(map);
+                            
+                            const customIcon = L.divIcon({
+                                className: 'cg-marker-wrapper',
+                                html: `
+                                    <div class="cg-marker" style="background-color: <?php echo esc_js($marker_color); ?>">
+                                        <span class="cg-marker-inner"><?php echo esc_js($marker_icon); ?></span>
+                                    </div>
+                                `,
+                                iconSize: [36, 36],
+                                iconAnchor: [18, 36],
+                                popupAnchor: [0, -36]
+                            });
+                            
+                            L.marker([<?php echo esc_js($lat); ?>, <?php echo esc_js($lng); ?>], {icon: customIcon}).addTo(map);
                         });
                     </script>
                 </section>
