@@ -6,6 +6,14 @@
  */
 
 get_header();
+
+// DEBUG: Uncomment to see what's happening with price filter
+if (!empty($_GET['price']) && current_user_can('manage_options')) {
+    $debug_raw = $_GET['price'];
+    $debug_slug = capiznon_geo_resolve_price_slug($debug_raw);
+    $debug_term = get_term_by('slug', $debug_slug, 'location_price');
+    echo '<!-- DEBUG price: raw=' . esc_html($debug_raw) . ' | slug=' . esc_html($debug_slug) . ' | term=' . ($debug_term ? $debug_term->name : 'NOT FOUND') . ' | found_posts=' . $GLOBALS['wp_query']->found_posts . ' -->';
+}
 ?>
 
 <main id="main" class="flex-1 bg-gradient-to-br from-orange-50 via-amber-50 to-yellow-50">
@@ -40,6 +48,11 @@ get_header();
                 if (!empty($_GET['cuisine'])) {
                     $cuisine_term = get_term_by('slug', sanitize_text_field($_GET['cuisine']), 'location_cuisine');
                     if ($cuisine_term) $active_filters[] = $cuisine_term->name;
+                }
+                if (!empty($_GET['price'])) {
+                    $price_slug = capiznon_geo_resolve_price_slug($_GET['price']);
+                    $price_term = get_term_by('slug', $price_slug, 'location_price');
+                    if ($price_term) $active_filters[] = $price_term->name;
                 }
                 if (!empty($_GET['search'])) {
                     $active_filters[] = '"' . esc_html(sanitize_text_field($_GET['search'])) . '"';
@@ -181,25 +194,27 @@ get_header();
                                 </select>
                             </div>
                             <div>
-                                <label class="block text-xs font-semibold text-amber-700 mb-1.5 uppercase tracking-wide"><?php esc_html_e('Price', 'capiznon-geo'); ?></label>
-                                <select id="cg-filter-price" class="cg-filter-control">
+                                <label for="cg-filter-price" class="block text-xs font-semibold text-amber-700 mb-1.5 uppercase tracking-wide"><?php esc_html_e('Price', 'capiznon-geo'); ?></label>
+                                <select id="cg-filter-price" class="cg-filter-control" aria-label="<?php esc_attr_e('Price', 'capiznon-geo'); ?>">
                                     <option value=""><?php esc_html_e('Any', 'capiznon-geo'); ?></option>
                                 </select>
                             </div>
                         </div>
 
-                        <div id="cg-filter-cuisine-wrapper" class="hidden">
-                            <label class="block text-xs font-semibold text-amber-700 mb-1.5 uppercase tracking-wide"><?php esc_html_e('Cuisine', 'capiznon-geo'); ?></label>
-                            <select id="cg-filter-cuisine" class="cg-filter-control">
+                        <div id="cg-filter-cuisine-wrapper">
+                            <label for="cg-filter-cuisine" class="block text-xs font-semibold text-amber-700 mb-1.5 uppercase tracking-wide"><?php esc_html_e('Cuisine', 'capiznon-geo'); ?></label>
+                            <select id="cg-filter-cuisine" class="cg-filter-control" aria-label="<?php esc_attr_e('Cuisine', 'capiznon-geo'); ?>">
                                 <option value=""><?php esc_html_e('Any', 'capiznon-geo'); ?></option>
                             </select>
                         </div>
                         
-                        <label class="flex items-center gap-3 p-3 bg-gradient-to-r from-amber-50 to-orange-50 rounded-2xl cursor-pointer hover:from-amber-100 hover:to-orange-100 transition-all border border-amber-200">
-                            <input type="checkbox" id="cg-filter-featured" class="cg-filter-control w-5 h-5 rounded border-2 border-amber-300 text-amber-600 focus:ring-amber-200">
-                            <span class="text-sm font-medium text-amber-900"><?php esc_html_e('Featured locations only', 'capiznon-geo'); ?></span>
-                            <span class="ml-auto text-lg">⭐</span>
-                        </label>
+                        <div class="flex items-center gap-3 p-3 bg-gradient-to-r from-amber-50 to-orange-50 rounded-2xl hover:from-amber-100 hover:to-orange-100 transition-all border border-amber-200">
+                            <input type="checkbox" id="cg-filter-featured" class="cg-filter-control w-5 h-5 rounded border-2 border-amber-300 text-amber-600 focus:ring-amber-200 shrink-0">
+                            <label for="cg-filter-featured" class="text-sm font-medium text-amber-900 cursor-pointer flex-1">
+                                <?php esc_html_e('Featured locations only', 'capiznon-geo'); ?>
+                            </label>
+                            <span aria-hidden="true" class="ml-auto text-lg">⭐</span>
+                        </div>
                     </div>
                 </details>
 
@@ -334,17 +349,6 @@ document.addEventListener('DOMContentLoaded', function() {
             const type = this.dataset.type;
             filterArchiveLocations(type);
 
-            // Show cuisine filter only for Food quick filter
-            if (cuisineWrapper && cuisineSelect) {
-                if (type === 'food-dining') {
-                    cuisineWrapper.classList.remove('hidden');
-                } else {
-                    cuisineWrapper.classList.add('hidden');
-                    cuisineSelect.value = '';
-                    // Clear cuisine filter when leaving Food
-                    filterArchiveLocations(document.getElementById('cg-filter-type')?.value || '');
-                }
-            }
         });
     });
 

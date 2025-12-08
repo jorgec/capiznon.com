@@ -652,6 +652,16 @@ h1, h2, h3 {
     color: #451a03;
     background: white;
     transition: all 0.2s ease;
+}
+
+.cg-filter-control:focus {
+    outline: none;
+    border-color: #f59e0b;
+    box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.15);
+}
+
+/* Select styling only (keeps checkbox native) */
+select.cg-filter-control {
     appearance: none;
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%23f59e0b'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'/%3E%3C/svg%3E");
     background-repeat: no-repeat;
@@ -660,10 +670,13 @@ h1, h2, h3 {
     padding-right: 2.5rem;
 }
 
-.cg-filter-control:focus {
-    outline: none;
-    border-color: #f59e0b;
-    box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.15);
+.cg-filter-control[type="checkbox"] {
+    width: 1.2rem;
+    height: 1.2rem;
+    padding: 0;
+    border-radius: 0.4rem;
+    appearance: auto;
+    background-image: none;
 }
 
 /* ============================================

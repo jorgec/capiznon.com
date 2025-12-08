@@ -458,12 +458,13 @@ function capiznon_geo_get_filters() {
 
     $prices = get_terms([
         'taxonomy'   => 'location_price',
-        'hide_empty' => true,
+        'hide_empty' => false, // show all price ranges for filtering
     ]);
+    $prices = capiznon_geo_order_price_terms($prices);
 
     $cuisines = get_terms([
         'taxonomy'   => 'location_cuisine',
-        'hide_empty' => true,
+        'hide_empty' => false, // show full list so filter displays even if no posts yet
     ]);
 
     $format_terms = function($terms) {
@@ -489,6 +490,58 @@ function capiznon_geo_get_filters() {
         'prices'   => $format_terms($prices),
         'cuisines' => $format_terms($cuisines),
     ]);
+}
+
+/**
+ * Sort price terms in a custom order (₱ to ₱₱₱₱, fallback by name)
+ */
+if (!function_exists('capiznon_geo_order_price_terms')) {
+function capiznon_geo_order_price_terms($terms) {
+    if (is_wp_error($terms) || empty($terms)) {
+        return $terms;
+    }
+
+    $priority_map = [
+        'budget'      => 1,
+        'moderate'    => 2,
+        'upscale'     => 3,
+        'fine dining' => 4,
+    ];
+
+    $rank_term = function($term) use ($priority_map) {
+        $symbol_count = preg_match_all('/₱/u', $term->name, $matches);
+        if ($symbol_count === 0 && preg_match('/^p+$/i', $term->slug)) {
+            $symbol_count = strlen($term->slug);
+        }
+
+        $priority = 99;
+        foreach ($priority_map as $needle => $p) {
+            if (stripos($term->name, $needle) !== false || stripos($term->slug, sanitize_title($needle)) !== false) {
+                $priority = $p;
+                break;
+            }
+        }
+
+        // Prefer explicit priority, otherwise use symbol count, otherwise bottom
+        $rank = ($priority !== 99) ? $priority : ($symbol_count > 0 ? $symbol_count : 99);
+        return [$rank, $symbol_count];
+    };
+
+    usort($terms, function($a, $b) use ($rank_term) {
+        [$a_rank, $a_symbols] = $rank_term($a);
+        [$b_rank, $b_symbols] = $rank_term($b);
+
+        if ($a_rank === $b_rank) {
+            if ($a_symbols === $b_symbols) {
+                return strcasecmp($a->name, $b->name);
+            }
+            return $a_symbols <=> $b_symbols;
+        }
+        return $a_rank <=> $b_rank;
+    });
+
+    return $terms;
+}
 }
 
 /**
