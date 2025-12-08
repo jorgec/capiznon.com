@@ -50,6 +50,7 @@ require_once CAPIZNON_GEO_DIR . '/inc/template-functions.php';
 require_once CAPIZNON_GEO_DIR . '/inc/assets.php';
 require_once CAPIZNON_GEO_DIR . '/inc/visits.php';
 require_once CAPIZNON_GEO_DIR . '/inc/scaffold.php';
+require_once CAPIZNON_GEO_DIR . '/inc/query-filters.php';
 
 /**
  * Show admin notice for pending locations

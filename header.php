@@ -16,10 +16,15 @@
     <link rel="manifest" href="<?php echo esc_url( get_template_directory_uri() . '/manifest.webmanifest' ); ?>">
     <meta name="theme-color" content="#f59e0b">
     
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Display:wght@300;400;500;600;700&family=Sigmar+One&display=swap" rel="stylesheet">
+    
     <?php wp_head(); ?>
 </head>
 
-<body <?php body_class('font-sans antialiased bg-base-white text-base-black'); ?>>
+<body <?php body_class('antialiased bg-base-white text-base-black'); ?>>
 <?php wp_body_open(); ?>
 
 <div id="page" class="min-h-screen flex flex-col">

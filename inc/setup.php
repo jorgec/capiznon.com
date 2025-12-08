@@ -122,10 +122,10 @@ function capiznon_geo_create_default_menus() {
                 'menu-item-type'    => 'custom',
             ]);
             
-            // Explore Map
+            // Map
             wp_update_nav_menu_item($menu_id, 0, [
-                'menu-item-title'   => __('Explore', 'capiznon-geo'),
-                'menu-item-url'     => home_url('/'),
+                'menu-item-title'   => __('Map', 'capiznon-geo'),
+                'menu-item-url'     => home_url('/map/'),
                 'menu-item-status'  => 'publish',
                 'menu-item-type'    => 'custom',
             ]);
@@ -184,6 +184,35 @@ function capiznon_geo_create_default_menus() {
     }
 }
 add_action('after_switch_theme', 'capiznon_geo_create_default_menus');
+
+/**
+ * Create required pages on theme activation
+ */
+function capiznon_geo_create_required_pages() {
+    // Create Map page if it doesn't exist
+    $map_page = get_page_by_path('map');
+    
+    if (!$map_page) {
+        $map_page_id = wp_insert_post([
+            'post_title'     => __('Map', 'capiznon-geo'),
+            'post_name'      => 'map',
+            'post_status'    => 'publish',
+            'post_type'      => 'page',
+            'post_content'   => '',
+            'comment_status' => 'closed',
+            'ping_status'    => 'closed',
+        ]);
+        
+        if ($map_page_id && !is_wp_error($map_page_id)) {
+            // Set the page template
+            update_post_meta($map_page_id, '_wp_page_template', 'map.php');
+        }
+    } else {
+        // Ensure template is set correctly
+        update_post_meta($map_page->ID, '_wp_page_template', 'map.php');
+    }
+}
+add_action('after_switch_theme', 'capiznon_geo_create_required_pages');
 
 /**
  * Add theme options page

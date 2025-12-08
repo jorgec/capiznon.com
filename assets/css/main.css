@@ -100,11 +100,15 @@ html {
 }
 
 body {
-    font-family: 'Outfit', system-ui, -apple-system, sans-serif;
+    font-family: 'Noto Sans Display', system-ui, -apple-system, sans-serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     background: linear-gradient(135deg, #fef7ed 0%, #fed7aa 50%, #ffedd5 100%);
     min-height: 100vh;
+}
+
+h1, h2, h3 {
+    font-family: 'Sigmar One', cursive;
 }
 
 /* ============================================

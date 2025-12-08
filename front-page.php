@@ -1,325 +1,532 @@
 <?php
 /**
- * Front Page Template - Interactive Map
- * Bohemian Beach Vibe Design
+ * Front Page Template - Discovery Home
+ * Mobile-first card carousel layout
  *
  * @package Capiznon_Geo
  */
 
 get_header();
+
+// Get current user info
+$current_user = wp_get_current_user();
+$user_name = $current_user->ID ? $current_user->display_name : __('Explorer', 'capiznon-geo');
 ?>
 
-<main id="main" class="flex-1 relative bg-gradient-to-br from-orange-50 via-amber-50 to-yellow-50">
+<main id="main" class="flex-1 bg-white min-h-screen">
     
-
-    
-    <!-- Full-screen Map -->
-    <div class="fixed inset-0 top-[68px] z-0">
-        <div id="cg-map" class="w-full h-full"></div>
+    <div class="max-w-7xl mx-auto w-full sm:px-2 lg:px-4">
+        <!-- Header Section -->
+    <div class="px-4 py-6">
+        <div class="flex items-center justify-between">
+            <div>
+                <h1 class="text-2xl font-medium text-gray-900">
+                    <?php printf(__('Hi, %s', 'capiznon-geo'), esc_html($user_name)); ?>
+                </h1>
+                <p class="text-gray-500 text-sm mt-1">
+                    <?php esc_html_e('Capiz, Philippines', 'capiznon-geo'); ?>
+                </p>
+            </div>
+            <div class="flex items-center gap-3">
+                <a href="<?php echo esc_url(home_url('/map/')); ?>" class="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center text-gray-600 hover:bg-gray-200 transition-colors">
+                    <span>🗺️</span>
+                </a>
+                <?php if (is_user_logged_in()) : ?>
+                    <a href="<?php echo esc_url(get_edit_profile_url()); ?>" class="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center overflow-hidden">
+                        <?php echo get_avatar($current_user->ID, 40, '', '', ['class' => 'w-full h-full object-cover']); ?>
+                    </a>
+                <?php else : ?>
+                    <a href="<?php echo esc_url(wp_login_url()); ?>" class="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center">
+                        <span>👤</span>
+                    </a>
+                <?php endif; ?>
+            </div>
+        </div>
     </div>
 
-    <!-- Floating Filter Panel -->
-    <div id="cg-filter-panel" class="fixed top-20 left-4 z-30 w-80 max-w-[calc(100vw-2rem)] cg-filter-panel transition-all duration-300">
-        
-        <!-- Header with Toggle -->
-        <div class="cg-filter-header">
-            <div class="flex items-center justify-between relative z-10">
-                <div>
-                    <h2 class="text-lg font-bold flex items-center gap-2">
-                        <span class="text-2xl">🌊</span>
-                        <?php esc_html_e('Explore Capiz', 'capiznon-geo'); ?>
-                    </h2>
-                    <p class="text-sm text-white/70 mt-0.5">
-                        <span id="cg-location-count" class="font-semibold text-white">0</span>
-                        <?php esc_html_e('locations found', 'capiznon-geo'); ?>
-                    </p>
-                </div>
-                <button type="button" id="cg-filter-toggle" class="cg-filter-toggle" aria-expanded="true">
-                    <span class="toggle-show hidden"><?php esc_html_e('Show', 'capiznon-geo'); ?></span>
-                    <span class="toggle-hide"><?php esc_html_e('Hide', 'capiznon-geo'); ?></span>
-                </button>
-            </div>
-            
-            <!-- Decorative elements -->
-            <div class="absolute top-2 right-2 w-8 h-8 opacity-20">
-                <svg viewBox="0 0 100 100" fill="currentColor" class="text-amber-200">
-                    <path d="M50,10 Q60,30 80,30 Q60,50 50,70 Q40,50 20,30 Q40,30 50,10 Z"/>
+    <!-- Search Bar -->
+    <div class="px-4 mb-8">
+        <div class="relative">
+            <input 
+                type="search" 
+                id="cg-search" 
+                placeholder="<?php esc_attr_e('Search for places...', 'capiznon-geo'); ?>"
+                class="w-full pl-10 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-gray-300 focus:bg-white transition-colors placeholder:text-gray-400"
+            >
+            <div class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
                 </svg>
             </div>
-            <div class="absolute bottom-2 right-12 w-4 h-4 bg-amber-300/30 rotate-45 rounded-full"></div>
         </div>
+    </div>
 
-        <!-- Collapsible Body -->
-        <div id="cg-filter-body" class="cg-filter-body">
-            
-            <!-- Search -->
-            <div class="relative mb-4">
-                <input 
-                    type="search" 
-                    id="cg-search" 
-                    placeholder="<?php esc_attr_e('Search paradise...', 'capiznon-geo'); ?>"
-                    class="w-full pl-11 pr-4 py-3 bg-white/90 backdrop-blur-sm border-2 border-amber-200 rounded-2xl text-sm focus:outline-none focus:border-amber-400 focus:ring-2 focus:ring-amber-200 transition-all font-medium placeholder:text-amber-500"
-                >
-                <div class="absolute left-3.5 top-1/2 -translate-y-1/2 w-5 h-5 text-amber-600">
-                    <span class="text-xl">🔍</span>
+    <!-- Category Quick Filters -->
+    <div class="px-4 mb-8">
+        <div class="flex items-center justify-between mb-4">
+            <h2 class="text-base font-medium text-gray-900">
+                Categories
+            </h2>
+            <a href="<?php echo esc_url(get_post_type_archive_link('cg_location')); ?>" class="text-sm text-gray-600 hover:text-gray-900 transition-colors">
+                View all
+            </a>
+        </div>
+        <div class="flex gap-4 overflow-x-auto pb-2">
+            <button type="button" data-type="" class="cg-category-btn active flex flex-col items-center gap-2 flex-shrink-0">
+                <div class="w-14 h-14 bg-gray-900 rounded-xl flex items-center justify-center transition-colors">
+                    <span class="text-xl text-white">✨</span>
                 </div>
-            </div>
-
-            <!-- Quick Type Filters -->
-            <div class="flex flex-wrap gap-2 mb-4">
-                <button type="button" data-type="" class="cg-type-btn active px-4 py-2 text-xs font-bold rounded-full bg-gradient-to-r from-amber-500 to-orange-500 text-white transition-all hover:scale-105">
-                    ✨ <?php esc_html_e('All', 'capiznon-geo'); ?>
-                </button>
-                <button type="button" data-type="food-dining" class="cg-type-btn px-4 py-2 text-xs font-bold rounded-full bg-white/80 text-amber-800 hover:bg-gradient-to-r hover:from-amber-100 hover:to-orange-100 transition-all hover:scale-105 border border-amber-200">
-                    🍽️ <?php esc_html_e('Food', 'capiznon-geo'); ?>
-                </button>
-                <button type="button" data-type="accommodation" class="cg-type-btn px-4 py-2 text-xs font-bold rounded-full bg-white/80 text-amber-800 hover:bg-gradient-to-r hover:from-amber-100 hover:to-orange-100 transition-all hover:scale-105 border border-amber-200">
-                    🏨 <?php esc_html_e('Stay', 'capiznon-geo'); ?>
-                </button>
-                <button type="button" data-type="attractions" class="cg-type-btn px-4 py-2 text-xs font-bold rounded-full bg-white/80 text-amber-800 hover:bg-gradient-to-r hover:from-amber-100 hover:to-orange-100 transition-all hover:scale-105 border border-amber-200">
-                    ⭐ <?php esc_html_e('See', 'capiznon-geo'); ?>
-                </button>
-                <button type="button" data-type="shopping" class="cg-type-btn px-4 py-2 text-xs font-bold rounded-full bg-white/80 text-amber-800 hover:bg-gradient-to-r hover:from-amber-100 hover:to-orange-100 transition-all hover:scale-105 border border-amber-200">
-                    🛍️ <?php esc_html_e('Shop', 'capiznon-geo'); ?>
-                </button>
-            </div>
-
-            <!-- Advanced Filters (Expandable) -->
-            <details class="group">
-                <summary class="flex items-center justify-between cursor-pointer text-sm font-semibold text-amber-800 hover:text-amber-600 transition-colors py-2 border-t-2 border-dashed border-amber-200">
-                    <span class="flex items-center gap-2">
-                        <span class="text-lg">🎯</span>
-                        <?php esc_html_e('Discover More', 'capiznon-geo'); ?>
-                    </span>
-                    <svg class="w-4 h-4 transition-transform group-open:rotate-180 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
-                    </svg>
-                </summary>
-                
-                <div class="pt-3 space-y-3">
-                    <div>
-                        <label class="block text-xs font-semibold text-amber-700 mb-1.5 uppercase tracking-wide"><?php esc_html_e('Category', 'capiznon-geo'); ?></label>
-                        <select id="cg-filter-type" class="cg-filter-control">
-                            <option value=""><?php esc_html_e('All Types', 'capiznon-geo'); ?></option>
-                        </select>
-                    </div>
-                    
-                    <div>
-                        <label class="block text-xs font-semibold text-amber-700 mb-1.5 uppercase tracking-wide"><?php esc_html_e('Area', 'capiznon-geo'); ?></label>
-                        <select id="cg-filter-area" class="cg-filter-control">
-                            <option value=""><?php esc_html_e('All Areas', 'capiznon-geo'); ?></option>
-                        </select>
-                    </div>
-                    
-                    <div class="grid grid-cols-2 gap-3">
-                        <div>
-                            <label class="block text-xs font-semibold text-amber-700 mb-1.5 uppercase tracking-wide"><?php esc_html_e('Amenities', 'capiznon-geo'); ?></label>
-                            <select id="cg-filter-tag" class="cg-filter-control">
-                                <option value=""><?php esc_html_e('Any', 'capiznon-geo'); ?></option>
-                            </select>
-                        </div>
-                        <div>
-                            <label class="block text-xs font-semibold text-amber-700 mb-1.5 uppercase tracking-wide"><?php esc_html_e('Price', 'capiznon-geo'); ?></label>
-                            <select id="cg-filter-price" class="cg-filter-control">
-                                <option value=""><?php esc_html_e('Any', 'capiznon-geo'); ?></option>
-                            </select>
-                        </div>
-                    </div>
-
-                    <div id="cg-filter-cuisine-wrapper" class="hidden">
-                        <label class="block text-xs font-semibold text-amber-700 mb-1.5 uppercase tracking-wide"><?php esc_html_e('Cuisine', 'capiznon-geo'); ?></label>
-                        <select id="cg-filter-cuisine" class="cg-filter-control">
-                            <option value=""><?php esc_html_e('Any', 'capiznon-geo'); ?></option>
-                        </select>
-                    </div>
-                    
-                    <label class="flex items-center gap-3 p-3 bg-gradient-to-r from-amber-50 to-orange-50 rounded-2xl cursor-pointer hover:from-amber-100 hover:to-orange-100 transition-all border border-amber-200">
-                        <input type="checkbox" id="cg-filter-featured" class="cg-filter-control w-5 h-5 rounded border-2 border-amber-300 text-amber-600 focus:ring-amber-200">
-                        <span class="text-sm font-medium text-amber-900"><?php esc_html_e('Featured gems only', 'capiznon-geo'); ?></span>
-                        <span class="ml-auto text-lg">⭐</span>
-                    </label>
+                <span class="text-xs font-medium text-gray-900">All</span>
+            </button>
+            <button type="button" data-type="food-dining" class="cg-category-btn flex flex-col items-center gap-2 flex-shrink-0">
+                <div class="w-14 h-14 bg-gray-100 rounded-xl flex items-center justify-center hover:bg-gray-200 transition-colors">
+                    <span class="text-xl">🍽️</span>
                 </div>
-            </details>
-
-            <!-- Clear Filters -->
-            <button type="button" id="cg-clear-filters" class="w-full mt-4 py-2.5 text-sm font-semibold text-amber-700 hover:text-rose-600 border-2 border-dashed border-amber-300 hover:border-rose-300 rounded-2xl transition-all">
-                <?php esc_html_e('Clear all filters', 'capiznon-geo'); ?>
+                <span class="text-xs font-medium text-gray-600">Food</span>
+            </button>
+            <button type="button" data-type="accommodation" class="cg-category-btn flex flex-col items-center gap-2 flex-shrink-0">
+                <div class="w-14 h-14 bg-gray-100 rounded-xl flex items-center justify-center hover:bg-gray-200 transition-colors">
+                    <span class="text-xl">🏨</span>
+                </div>
+                <span class="text-xs font-medium text-gray-600">Stay</span>
+            </button>
+            <button type="button" data-type="attractions" class="cg-category-btn flex flex-col items-center gap-2 flex-shrink-0">
+                <div class="w-14 h-14 bg-gray-100 rounded-xl flex items-center justify-center hover:bg-gray-200 transition-colors">
+                    <span class="text-xl">⭐</span>
+                </div>
+                <span class="text-xs font-medium text-gray-600">See</span>
+            </button>
+            <button type="button" data-type="shopping" class="cg-category-btn flex flex-col items-center gap-2 flex-shrink-0">
+                <div class="w-14 h-14 bg-gray-100 rounded-xl flex items-center justify-center hover:bg-gray-200 transition-colors">
+                    <span class="text-xl">🛍️</span>
+                </div>
+                <span class="text-xs font-medium text-gray-600">Shop</span>
             </button>
         </div>
     </div>
 
-    <!-- Location List Panel (Right Side / Drawer) -->
-    <div id="cg-list-panel" class="fixed top-20 right-4 bottom-4 w-80 max-w-[calc(100vw-2rem)] z-40 cg-list-panel">
-        <div class="h-full bg-gradient-to-br from-white to-amber-50 backdrop-blur-lg rounded-3xl shadow-xl overflow-hidden flex flex-col border-2 border-amber-200">
-            
-            <!-- List Header -->
-            <div class="p-4 bg-gradient-to-r from-amber-100 to-orange-100 border-b border-amber-200">
-                <div class="flex items-center justify-between">
-                    <h3 class="font-bold text-amber-900 flex items-center gap-2">
-                        <span class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
-                        <span class="text-lg">🏝️</span>
-                        <?php esc_html_e('Discover Nearby', 'capiznon-geo'); ?>
-                    </h3>
-                    <button type="button" onclick="CapiznonGeoMap.fitToMarkers()" class="p-2 hover:bg-white/50 rounded-xl transition-colors" title="<?php esc_attr_e('Fit all', 'capiznon-geo'); ?>">
-                        <svg class="w-4 h-4 text-amber-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4"/>
-                        </svg>
-                    </button>
-                </div>
-            </div>
-            
-            <!-- Location List -->
-            <div id="cg-location-list" class="flex-1 overflow-y-auto p-3 space-y-3 cg-sidebar">
-                <div class="cg-loading">
-                    <div class="cg-spinner"></div>
-                </div>
-            </div>
+    <!-- Near Me Section (Hidden if empty) -->
+    <section id="cg-near-me-section" class="mb-12 hidden">
+        <div class="px-4 flex items-center justify-between mb-4">
+            <h2 class="text-base font-medium text-gray-900">
+                Near You
+            </h2>
+            <a href="<?php echo esc_url(home_url('/map/')); ?>?near=me" class="text-sm text-gray-600 hover:text-gray-900 transition-colors">
+                View all
+            </a>
         </div>
-    </div>
+        <div id="cg-near-me-carousel" class="cg-carousel">
+            <!-- Cards populated via JS -->
+        </div>
+    </section>
 
-    <!-- Mobile Drawer Toggle -->
-    <button 
-        type="button" 
-        id="cg-mobile-toggle"
-        class="lg:hidden fixed bottom-6 left-4 z-50 bg-gradient-to-r from-amber-500 to-orange-500 text-white px-6 py-3 rounded-full shadow-xl flex items-center gap-3 hover:shadow-2xl transition-all active:scale-95"
-    >
-        <span class="text-xl">🏝️</span>
-        <span class="font-bold"><?php esc_html_e('Discover Capiz', 'capiznon-geo'); ?></span>
-        <span id="cg-mobile-count" class="bg-white/20 px-2 py-0.5 rounded-full text-xs font-bold">0</span>
-    </button>
+    <!-- Featured Section -->
+    <section id="cg-featured-section" class="mb-12">
+        <div class="px-4 flex items-center justify-between mb-4">
+            <h2 class="text-base font-medium text-gray-900">
+                Featured
+            </h2>
+            <a href="<?php echo esc_url(get_post_type_archive_link('cg_location')); ?>?featured=1" class="text-sm text-gray-600 hover:text-gray-900 transition-colors">
+                View all
+            </a>
+        </div>
+        <div id="cg-featured-carousel" class="cg-carousel">
+            <?php
+            $featured = new WP_Query([
+                'post_type' => 'cg_location',
+                'posts_per_page' => 10,
+                'meta_query' => [
+                    [
+                        'key' => '_cg_featured',
+                        'value' => '1',
+                        'compare' => '='
+                    ]
+                ]
+            ]);
+            
+            if ($featured->have_posts()) :
+                while ($featured->have_posts()) : $featured->the_post();
+                    get_template_part('template-parts/card', 'location-carousel');
+                endwhile;
+                wp_reset_postdata();
+            else :
+                ?>
+                <div class="px-6 sm:px-8 lg:px-12 w-full text-center py-12 text-stone-400">
+                    <p><?php esc_html_e('No featured locations yet', 'capiznon-geo'); ?></p>
+                </div>
+                <?php
+            endif;
+            ?>
+        </div>
+    </section>
 
-    <!-- Desktop List Toggle -->
-    <button 
-        type="button" 
-        id="cg-desktop-list-toggle"
-        class="hidden lg:flex fixed bottom-6 left-6 z-30 bg-gradient-to-r from-amber-100 to-orange-100 text-amber-900 px-4 py-2 rounded-full shadow-xl items-center gap-2 hover:shadow-2xl transition-all active:scale-95 border border-amber-200 font-semibold"
-    >
-        <span class="text-lg">🏝️</span>
-        <span class="text-sm font-bold"><?php esc_html_e('View Locations', 'capiznon-geo'); ?></span>
-    </button>
+    <!-- Food Section -->
+    <section id="cg-food-section" class="mb-14">
+        <div class="px-6 sm:px-8 lg:px-12 flex items-center justify-between mb-5">
+            <h2 class="text-sm font-semibold text-stone-500 uppercase tracking-wider flex items-center gap-2">
+                <span>🍽️</span>
+                <?php esc_html_e('Food & Dining', 'capiznon-geo'); ?>
+            </h2>
+            <a href="<?php echo esc_url(get_post_type_archive_link('cg_location')); ?>?type=food-dining" class="text-amber-600/80 font-medium text-sm hover:text-amber-700 transition-colors">
+                <?php esc_html_e('View all', 'capiznon-geo'); ?>
+            </a>
+        </div>
+        <div id="cg-food-carousel" class="cg-carousel">
+            <?php
+            $food = new WP_Query([
+                'post_type' => 'cg_location',
+                'posts_per_page' => 6,
+                'orderby' => 'rand',
+                'tax_query' => [
+                    [
+                        'taxonomy' => 'location_type',
+                        'field' => 'slug',
+                        'terms' => ['food-dining', 'restaurants', 'cafes', 'bars', 'street-food', 'bakeries'],
+                    ]
+                ]
+            ]);
+            
+            if ($food->have_posts()) :
+                while ($food->have_posts()) : $food->the_post();
+                    get_template_part('template-parts/card', 'location-carousel');
+                endwhile;
+                wp_reset_postdata();
+            else :
+                ?>
+                <div class="px-6 sm:px-8 lg:px-12 w-full text-center py-12 text-stone-400">
+                    <p><?php esc_html_e('No food locations yet', 'capiznon-geo'); ?></p>
+                </div>
+                <?php
+            endif;
+            ?>
+        </div>
+    </section>
 
-    <!-- Add Location Buttons -->
-    <div class="fixed bottom-6 right-6 z-40 flex flex-col items-end gap-3">
-        <button
-            type="button"
-            id="cg-add-my-location"
-            class="bg-gradient-to-r from-amber-500 to-orange-500 text-white px-4 py-2 rounded-full shadow-xl flex items-center gap-2 hover:shadow-2xl transition-all active:scale-95 text-sm font-bold"
-        >
-            <span class="text-lg">📍</span>
-            <span><?php esc_html_e('Add Location', 'capiznon-geo'); ?></span>
-        </button>
-        <button
-            type="button"
-            id="cg-add-place-here"
-            class="bg-gradient-to-r from-amber-100 to-orange-100 text-amber-900 px-4 py-2 rounded-full shadow-xl flex items-center gap-2 hover:shadow-2xl transition-all active:scale-95 text-sm font-bold border border-amber-200"
-        >
-            <span class="text-lg">✨</span>
-            <span><?php esc_html_e('Add Here', 'capiznon-geo'); ?></span>
-        </button>
-    </div>
+    <!-- Stay Section -->
+    <section id="cg-stay-section" class="mb-14">
+        <div class="px-6 sm:px-8 lg:px-12 flex items-center justify-between mb-5">
+            <h2 class="text-sm font-semibold text-stone-500 uppercase tracking-wider flex items-center gap-2">
+                <span>🏨</span>
+                <?php esc_html_e('Places to Stay', 'capiznon-geo'); ?>
+            </h2>
+            <a href="<?php echo esc_url(get_post_type_archive_link('cg_location')); ?>?type=accommodation" class="text-amber-600/80 font-medium text-sm hover:text-amber-700 transition-colors">
+                <?php esc_html_e('View all', 'capiznon-geo'); ?>
+            </a>
+        </div>
+        <div id="cg-stay-carousel" class="cg-carousel">
+            <?php
+            $stay = new WP_Query([
+                'post_type' => 'cg_location',
+                'posts_per_page' => 6,
+                'orderby' => 'rand',
+                'tax_query' => [
+                    [
+                        'taxonomy' => 'location_type',
+                        'field' => 'slug',
+                        'terms' => ['accommodation', 'hotels', 'resorts', 'guesthouses', 'homestays', 'hostels'],
+                    ]
+                ]
+            ]);
+            
+            if ($stay->have_posts()) :
+                while ($stay->have_posts()) : $stay->the_post();
+                    get_template_part('template-parts/card', 'location-carousel');
+                endwhile;
+                wp_reset_postdata();
+            else :
+                ?>
+                <div class="px-6 sm:px-8 lg:px-12 w-full text-center py-12 text-stone-400">
+                    <p><?php esc_html_e('No accommodation yet', 'capiznon-geo'); ?></p>
+                </div>
+                <?php
+            endif;
+            ?>
+        </div>
+    </section>
+
+    <!-- See Section -->
+    <section id="cg-see-section" class="mb-14">
+        <div class="px-6 sm:px-8 lg:px-12 flex items-center justify-between mb-5">
+            <h2 class="text-sm font-semibold text-stone-500 uppercase tracking-wider flex items-center gap-2">
+                <span>⭐</span>
+                <?php esc_html_e('Things to See', 'capiznon-geo'); ?>
+            </h2>
+            <a href="<?php echo esc_url(get_post_type_archive_link('cg_location')); ?>?type=attractions" class="text-amber-600/80 font-medium text-sm hover:text-amber-700 transition-colors">
+                <?php esc_html_e('View all', 'capiznon-geo'); ?>
+            </a>
+        </div>
+        <div id="cg-see-carousel" class="cg-carousel">
+            <?php
+            $see = new WP_Query([
+                'post_type' => 'cg_location',
+                'posts_per_page' => 6,
+                'orderby' => 'rand',
+                'tax_query' => [
+                    [
+                        'taxonomy' => 'location_type',
+                        'field' => 'slug',
+                        'terms' => ['attractions', 'beaches', 'historical', 'parks', 'museums', 'religious'],
+                    ]
+                ]
+            ]);
+            
+            if ($see->have_posts()) :
+                while ($see->have_posts()) : $see->the_post();
+                    get_template_part('template-parts/card', 'location-carousel');
+                endwhile;
+                wp_reset_postdata();
+            else :
+                ?>
+                <div class="px-6 sm:px-8 lg:px-12 w-full text-center py-12 text-stone-400">
+                    <p><?php esc_html_e('No attractions yet', 'capiznon-geo'); ?></p>
+                </div>
+                <?php
+            endif;
+            ?>
+        </div>
+    </section>
+
+    <!-- Shop Section -->
+    <section id="cg-shop-section" class="mb-14">
+        <div class="px-6 sm:px-8 lg:px-12 flex items-center justify-between mb-5">
+            <h2 class="text-sm font-semibold text-stone-500 uppercase tracking-wider flex items-center gap-2">
+                <span>🛍️</span>
+                <?php esc_html_e('Shopping', 'capiznon-geo'); ?>
+            </h2>
+            <a href="<?php echo esc_url(get_post_type_archive_link('cg_location')); ?>?type=shopping" class="text-amber-600/80 font-medium text-sm hover:text-amber-700 transition-colors">
+                <?php esc_html_e('View all', 'capiznon-geo'); ?>
+            </a>
+        </div>
+        <div id="cg-shop-carousel" class="cg-carousel">
+            <?php
+            $shop = new WP_Query([
+                'post_type' => 'cg_location',
+                'posts_per_page' => 6,
+                'orderby' => 'rand',
+                'tax_query' => [
+                    [
+                        'taxonomy' => 'location_type',
+                        'field' => 'slug',
+                        'terms' => ['shopping', 'markets', 'malls', 'souvenirs', 'local-products'],
+                    ]
+                ]
+            ]);
+            
+            if ($shop->have_posts()) :
+                while ($shop->have_posts()) : $shop->the_post();
+                    get_template_part('template-parts/card', 'location-carousel');
+                endwhile;
+                wp_reset_postdata();
+            else :
+                ?>
+                <div class="px-6 sm:px-8 lg:px-12 w-full text-center py-12 text-stone-400">
+                    <p><?php esc_html_e('No shopping locations yet', 'capiznon-geo'); ?></p>
+                </div>
+                <?php
+            endif;
+            ?>
+        </div>
+    </section>
+
+    </div><!-- .max-w-7xl -->
 
 </main>
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    // Filter panel toggle
-    const filterToggle = document.getElementById('cg-filter-toggle');
-    const filterBody = document.getElementById('cg-filter-body');
-    const toggleShow = filterToggle?.querySelector('.toggle-show');
-    const toggleHide = filterToggle?.querySelector('.toggle-hide');
+    // Category filter buttons
+    const categoryBtns = document.querySelectorAll('.cg-category-btn');
     
-    filterToggle?.addEventListener('click', function() {
-        const isExpanded = this.getAttribute('aria-expanded') === 'true';
-        this.setAttribute('aria-expanded', !isExpanded);
-        filterBody?.classList.toggle('hidden');
-        toggleShow?.classList.toggle('hidden');
-        toggleHide?.classList.toggle('hidden');
-    });
-
-    // Quick type filter buttons
-    const cuisineWrapper = document.getElementById('cg-filter-cuisine-wrapper');
-    const cuisineSelect = document.getElementById('cg-filter-cuisine');
-
-    document.querySelectorAll('.cg-type-btn').forEach(btn => {
+    categoryBtns.forEach(btn => {
         btn.addEventListener('click', function() {
-            document.querySelectorAll('.cg-type-btn').forEach(b => {
-                b.classList.remove('active', 'bg-primary', 'text-white');
-                b.classList.add('bg-sand', 'text-ocean-deep');
-            });
-            this.classList.add('active', 'bg-primary', 'text-white');
-            this.classList.remove('bg-sand', 'text-ocean-deep');
-            
             const type = this.dataset.type;
-            CapiznonGeoMap.filter({ type: type });
-
-            // Show cuisine filter only for Food quick filter
-            if (cuisineWrapper && cuisineSelect) {
-                if (type === 'food-dining') {
-                    cuisineWrapper.classList.remove('hidden');
+            
+            // Update active state
+            categoryBtns.forEach(b => {
+                const icon = b.querySelector('div');
+                const label = b.querySelector('span:last-child');
+                if (b === this) {
+                    b.classList.add('active');
+                    icon.classList.remove('bg-white/90', 'border', 'border-stone-100/80');
+                    icon.classList.add('bg-gradient-to-br', 'from-amber-200/90', 'to-orange-200/90');
+                    label.classList.remove('text-stone-500');
+                    label.classList.add('text-stone-600');
                 } else {
-                    cuisineWrapper.classList.add('hidden');
-                    cuisineSelect.value = '';
-                    // Clear cuisine filter when leaving Food
-                    CapiznonGeoMap.filter({ cuisine: '' });
+                    b.classList.remove('active');
+                    icon.classList.add('bg-white/90', 'border', 'border-stone-100/80');
+                    icon.classList.remove('bg-gradient-to-br', 'from-amber-200/90', 'to-orange-200/90');
+                    label.classList.add('text-stone-500');
+                    label.classList.remove('text-stone-600');
                 }
+            });
+            
+            // Filter sections based on type
+            filterSections(type);
+        });
+    });
+    
+    function filterSections(type) {
+        const sections = {
+            'food-dining': 'cg-food-section',
+            'accommodation': 'cg-stay-section',
+            'attractions': 'cg-see-section',
+            'shopping': 'cg-shop-section'
+        };
+        
+        if (!type) {
+            // Show all sections
+            Object.values(sections).forEach(id => {
+                document.getElementById(id)?.classList.remove('hidden');
+            });
+            document.getElementById('cg-featured-section')?.classList.remove('hidden');
+        } else {
+            // Hide all, show only selected
+            Object.entries(sections).forEach(([key, id]) => {
+                const section = document.getElementById(id);
+                if (section) {
+                    if (key === type) {
+                        section.classList.remove('hidden');
+                    } else {
+                        section.classList.add('hidden');
+                    }
+                }
+            });
+            // Hide featured when filtering by type
+            document.getElementById('cg-featured-section')?.classList.add('hidden');
+        }
+    }
+    
+    // Search functionality
+    const searchInput = document.getElementById('cg-search');
+    let searchTimeout;
+    
+    searchInput?.addEventListener('input', function() {
+        clearTimeout(searchTimeout);
+        searchTimeout = setTimeout(() => {
+            const query = this.value.trim();
+            if (query.length >= 2) {
+                // Redirect to archive with search
+                window.location.href = `<?php echo esc_url(get_post_type_archive_link('cg_location')); ?>?search=${encodeURIComponent(query)}`;
             }
-        });
+        }, 500);
     });
-
-    // Update mobile count
-    document.addEventListener('cg:locationsLoaded', function(e) {
-        const mobileCount = document.getElementById('cg-mobile-count');
-        if (mobileCount) mobileCount.textContent = e.detail.total;
-    });
-
-    // Shared function to toggle the drawer panel
-    const listPanel = document.getElementById('cg-list-panel');
-    function toggleListPanel() {
-        if (!listPanel) return;
-        listPanel.classList.toggle('cg-list-panel-open');
-    }
-
-    // Mobile drawer toggle
-    const mobileToggle = document.getElementById('cg-mobile-toggle');
-    if (mobileToggle && listPanel) {
-        mobileToggle.addEventListener('click', function() {
-            toggleListPanel();
-        });
-    }
-
-    // Desktop show/hide toggle
-    const desktopToggle = document.getElementById('cg-desktop-list-toggle');
-    if (desktopToggle && listPanel) {
-        desktopToggle.addEventListener('click', function() {
-            toggleListPanel();
-        });
-    }
-
-    // Close list panel when clicking outside it
-    document.addEventListener('click', function(e) {
-        if (!listPanel) return;
-        if (!listPanel.classList.contains('cg-list-panel-open')) return;
-
-        const isClickInsidePanel = listPanel.contains(e.target);
-        const isToggleButton = e.target.closest('#cg-mobile-toggle') || e.target.closest('#cg-desktop-list-toggle');
-        if (!isClickInsidePanel && !isToggleButton) {
-            listPanel.classList.remove('cg-list-panel-open');
+    
+    searchInput?.addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+            const query = this.value.trim();
+            if (query) {
+                window.location.href = `<?php echo esc_url(get_post_type_archive_link('cg_location')); ?>?search=${encodeURIComponent(query)}`;
+            }
         }
     });
-
-    // Close list panel on Escape key
-    document.addEventListener('keydown', function(e) {
-        if (e.key !== 'Escape') return;
-        if (!listPanel) return;
-        if (!listPanel.classList.contains('cg-list-panel-open')) return;
-        listPanel.classList.remove('cg-list-panel-open');
-    });
+    
+    // Near Me functionality
+    if (navigator.geolocation) {
+        // Don't auto-request - wait for user interaction or show prompt
+        const nearMeSection = document.getElementById('cg-near-me-section');
+        
+        // Check if we have cached location
+        const cachedLat = localStorage.getItem('cg_user_lat');
+        const cachedLng = localStorage.getItem('cg_user_lng');
+        
+        if (cachedLat && cachedLng) {
+            loadNearbyLocations(parseFloat(cachedLat), parseFloat(cachedLng));
+        }
+    }
+    
+    async function loadNearbyLocations(lat, lng) {
+        try {
+            const response = await fetch(`<?php echo esc_url(rest_url('capiznon-geo/v1/locations')); ?>?lat=${lat}&lng=${lng}&radius=1`);
+            if (!response.ok) return;
+            
+            const data = await response.json();
+            
+            if (data.locations && data.locations.length > 0) {
+                const section = document.getElementById('cg-near-me-section');
+                const carousel = document.getElementById('cg-near-me-carousel');
+                
+                if (section && carousel) {
+                    section.classList.remove('hidden');
+                    carousel.innerHTML = data.locations.map(loc => createLocationCard(loc)).join('');
+                }
+            }
+        } catch (error) {
+            console.error('Error loading nearby locations:', error);
+        }
+    }
+    
+    function createLocationCard(location) {
+        const distance = location.distance ? `${location.distance.toFixed(1)}km` : '';
+        const image = location.thumbnail || '';
+        const imageHtml = image 
+            ? `<img src="${image}" alt="${location.title}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">`
+            : `<div class="w-full h-full bg-gradient-to-br from-stone-100 to-amber-50 flex items-center justify-center"><span class="text-3xl opacity-50">🏝️</span></div>`;
+        
+        return `
+            <a href="${location.permalink}" class="w-52 group">
+                <div class="bg-white/90 backdrop-blur-sm rounded-2xl shadow-sm border border-stone-100/80 overflow-hidden hover:shadow-md hover:border-amber-200/50 transition-all duration-300">
+                    <div class="aspect-[4/3] relative overflow-hidden">
+                        ${imageHtml}
+                        ${location.featured ? '<span class="absolute top-2.5 left-2.5 bg-gradient-to-r from-rose-400 to-pink-400 text-white text-[10px] font-bold px-2 py-0.5 rounded-full shadow-sm uppercase tracking-wide">Hot</span>' : ''}
+                        <button type="button" class="absolute top-2.5 right-2.5 w-7 h-7 bg-white/80 backdrop-blur-sm rounded-full flex items-center justify-center text-stone-300 hover:text-rose-400 transition-colors shadow-sm">
+                            ❤️
+                        </button>
+                    </div>
+                    <div class="p-4">
+                        <h3 class="font-semibold text-stone-700 text-sm leading-tight line-clamp-2">${location.title}</h3>
+                        <div class="flex items-center justify-between mt-2">
+                            <span class="text-xs text-stone-400">${location.type || ''}</span>
+                            ${distance ? `<span class="text-xs text-amber-600/70 font-medium">${distance}</span>` : ''}
+                        </div>
+                    </div>
+                </div>
+            </a>
+        `;
+    }
 });
 </script>
 
+<style>
+/* Carousel container - hide scrollbar completely */
+.cg-carousel {
+    display: flex;
+    gap: 1.25rem;
+    overflow-x: auto;
+    overflow-y: hidden;
+    padding: 0.5rem 1.5rem 1.5rem 1.5rem;
+    scroll-snap-type: x mandatory;
+    scroll-behavior: smooth;
+    -webkit-overflow-scrolling: touch;
+    
+    /* Hide scrollbar - all browsers */
+    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none; /* IE/Edge */
+}
+
+@media (min-width: 640px) {
+    .cg-carousel {
+}
+
+.cg-carousel::-webkit-scrollbar {
+    display: none;
+}
+
+.cg-carousel > * {
+    flex-shrink: 0;
+    scroll-snap-align: start;
+}
+
+/* Category button active state */
+.cg-category-btn.active > div:first-child {
+    background-color: rgb(17 24 39);
+}
+
+.cg-category-btn.active > span:last-child {
+    color: rgb(17 24 39);
+}
+</style>
+
 <?php 
-// Don't show footer on map page - full screen experience
-wp_footer(); 
+// Use regular footer on front page
+get_footer(); 
 ?>
-</body>
-</html>

@@ -64,6 +64,7 @@ class Capiznon_Geo_Scaffold
                     $this->seed_tags();
                     $this->seed_price_ranges();
                     $this->seed_cuisines();
+                    $this->create_required_pages();
                     add_action('admin_notices', [$this, 'show_success_notice']);
                     break;
                     
@@ -94,6 +95,11 @@ class Capiznon_Geo_Scaffold
                     
                 case 'seed_sample_locations':
                     $this->seed_sample_locations();
+                    add_action('admin_notices', [$this, 'show_success_notice']);
+                    break;
+                    
+                case 'create_pages':
+                    $this->create_required_pages();
                     add_action('admin_notices', [$this, 'show_success_notice']);
                     break;
             }
@@ -392,6 +398,35 @@ class Capiznon_Geo_Scaffold
     }
 
     /**
+     * Create required pages (Map page)
+     */
+    private function create_required_pages()
+    {
+        // Create Map page if it doesn't exist
+        $map_page = get_page_by_path('map');
+        
+        if (!$map_page) {
+            $map_page_id = wp_insert_post([
+                'post_title'     => __('Map', 'capiznon-geo'),
+                'post_name'      => 'map',
+                'post_status'    => 'publish',
+                'post_type'      => 'page',
+                'post_content'   => '',
+                'comment_status' => 'closed',
+                'ping_status'    => 'closed',
+            ]);
+            
+            if ($map_page_id && !is_wp_error($map_page_id)) {
+                // Set the page template
+                update_post_meta($map_page_id, '_wp_page_template', 'map.php');
+            }
+        } else {
+            // Ensure template is set correctly
+            update_post_meta($map_page->ID, '_wp_page_template', 'map.php');
+        }
+    }
+
+    /**
      * Show success notice
      */
     public function show_success_notice()
@@ -481,6 +516,22 @@ class Capiznon_Geo_Scaffold
                                     <p><?php _e('Creates a few sample locations to demonstrate the theme functionality.', 'capiznon-geo'); ?></p>
                                     <button type="submit" name="scaffold_action" value="seed_sample_locations" class="button">
                                         <?php _e('Create Sample Locations', 'capiznon-geo'); ?>
+                                    </button>
+                                </td>
+                            </tr>
+                            
+                            <tr>
+                                <th scope="row"><?php _e('Required Pages', 'capiznon-geo'); ?></th>
+                                <td>
+                                    <p><?php _e('Creates required pages like the Map page with proper template assignment.', 'capiznon-geo'); ?></p>
+                                    <?php 
+                                    $map_page = get_page_by_path('map');
+                                    if ($map_page) {
+                                        echo '<p class="description" style="color: green;">✅ ' . __('Map page exists', 'capiznon-geo') . ' - <a href="' . get_permalink($map_page) . '">' . __('View', 'capiznon-geo') . '</a></p>';
+                                    }
+                                    ?>
+                                    <button type="submit" name="scaffold_action" value="create_pages" class="button">
+                                        <?php _e('Create Required Pages', 'capiznon-geo'); ?>
                                     </button>
                                 </td>
                             </tr>
