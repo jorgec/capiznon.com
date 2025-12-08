@@ -1,0 +1,93 @@
+# Development Dependencies
+node_modules/
+package-lock.json
+package.json
+
+# Build Configuration
+tailwind.config.js
+postcss.config.js
+webpack.config.js
+vite.config.js
+gulpfile.js
+
+# Build Artifacts
+assets/css/input.css
+assets/css/tailwind-built.css.map
+*.log
+
+# IDE & Editor Files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+
+# WordPress Specific
+wp-config.php
+wp-content/advanced-cache.php
+wp-content/backups/
+wp-content/cache/
+wp-content/upgrade/
+wp-content/uploads/
+wp-content/mu-plugins/
+wp-content/plugins/
+wp-content/themes/index.php
+
+# Environment Files
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Backup & Temp Files
+*.bak
+*.backup
+*.tmp
+*.temp
+
+# Documentation (keep README.md)
+docs/changelog.md
+docs/01-installation.md
+docs/02-environment-setup.md
+docs/03-database-setup.md
+docs/04-dependencies.md
+docs/05-configuration.md
+docs/06-customization.md
+docs/07-troubleshooting.md
+
+# Vendor README (keep vendor files)
+VENDOR_README.md
+
+# Git Files
+.gitattributes
+
+# Testing
+tests/
+coverage/
+*.test.js
+*.spec.js
+phpunit.xml
+.phpunit.result.cache
+
+# Deployment
+.deploy/
+dist/
+build/
+
+# Local Development
+.local/
+.localhost/
+*.local
+
+# Cache
+.cache/
+.sass-cache/
+.php_cs.cache
+
+# OS Generated
+.DS_Store?
+ehthumbs.db
+Thumbs.db
