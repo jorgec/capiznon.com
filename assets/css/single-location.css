@@ -1,0 +1,317 @@
+/**
+ * Single Location Styles - Bohemian Beach Vibe
+ * Art Nouveau touches with warm, organic gradients
+ */
+
+/* ============================================
+   Enhanced Typography & Base
+   ============================================ */
+body.single-cg_location {
+    background: linear-gradient(135deg, #fef7ed 0%, #fed7aa 50%, #ffedd5 100%);
+    min-height: 100vh;
+}
+
+/* ============================================
+   Hero Section with Art Nouveau flair
+   ============================================ */
+.cg-hero-wave {
+    animation: wave 20s ease-in-out infinite;
+}
+
+@keyframes wave {
+    0%, 100% { transform: translateX(0); }
+    50% { transform: translateX(-20px); }
+}
+
+/* ============================================
+   Bohemian Card Styles
+   ============================================ */
+.cg-boho-card {
+    background: rgba(255, 255, 255, 0.85);
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(251, 191, 36, 0.2);
+    box-shadow: 
+        0 20px 25px -5px rgba(251, 191, 36, 0.1),
+        0 10px 10px -5px rgba(251, 191, 36, 0.04),
+        inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    transition: all 0.3s ease;
+}
+
+.cg-boho-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 
+        0 25px 50px -12px rgba(251, 191, 36, 0.25),
+        inset 0 1px 0 rgba(255, 255, 255, 0.2);
+}
+
+/* ============================================
+   Decorative Elements
+   ============================================ */
+.cg-sun-icon {
+    animation: rotate 60s linear infinite;
+}
+
+@keyframes rotate {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+.cg-flower-icon {
+    animation: float 6s ease-in-out infinite;
+}
+
+@keyframes float {
+    0%, 100% { transform: translateY(0px); }
+    50% { transform: translateY(-10px); }
+}
+
+/* ============================================
+   Badge Enhancements
+   ============================================ */
+.cg-type-badge {
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.95), rgba(254, 243, 199, 0.95));
+    backdrop-filter: blur(8px);
+    border: 1px solid rgba(251, 191, 36, 0.3);
+    box-shadow: 0 4px 6px -1px rgba(251, 191, 36, 0.1);
+    transition: all 0.2s ease;
+}
+
+.cg-type-badge:hover {
+    transform: scale(1.05);
+    box-shadow: 0 10px 15px -3px rgba(251, 191, 36, 0.2);
+}
+
+.cg-cuisine-badge {
+    background: linear-gradient(135deg, rgba(254, 226, 226, 0.95), rgba(252, 231, 243, 0.95));
+    backdrop-filter: blur(8px);
+    border: 1px solid rgba(244, 63, 94, 0.2);
+    box-shadow: 0 2px 4px -1px rgba(244, 63, 94, 0.1);
+}
+
+.cg-price-badge {
+    background: linear-gradient(135deg, rgba(220, 252, 231, 0.95), rgba(187, 247, 208, 0.95));
+    backdrop-filter: blur(8px);
+    border: 1px solid rgba(34, 197, 94, 0.2);
+    box-shadow: 0 2px 4px -1px rgba(34, 197, 94, 0.1);
+}
+
+/* ============================================
+   Contact Items with Organic Hover
+   ============================================ */
+.cg-contact-item {
+    position: relative;
+    overflow: hidden;
+}
+
+.cg-contact-item::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(251, 191, 36, 0.1), transparent);
+    transition: left 0.5s ease;
+}
+
+.cg-contact-item:hover::before {
+    left: 100%;
+}
+
+.cg-contact-icon {
+    background: linear-gradient(135deg, #fef3c7, #fed7aa);
+    transition: all 0.3s ease;
+}
+
+.cg-contact-item:hover .cg-contact-icon {
+    transform: scale(1.1) rotate(5deg);
+    background: linear-gradient(135deg, #fde68a, #fcd34d);
+}
+
+/* ============================================
+   Social Links with Beachy Effects
+   ============================================ */
+.cg-social-link {
+    position: relative;
+    overflow: hidden;
+    transition: all 0.3s ease;
+}
+
+.cg-social-link::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.3);
+    transform: translate(-50%, -50%);
+    transition: width 0.3s ease, height 0.3s ease;
+}
+
+.cg-social-link:hover::after {
+    width: 100%;
+    height: 100%;
+}
+
+.cg-social-link:hover {
+    transform: scale(1.1) rotate(-5deg);
+}
+
+/* ============================================
+   Hours Display with Today Highlight
+   ============================================ */
+.cg-hours-today {
+    background: linear-gradient(135deg, #fef3c7, #fed7aa);
+    position: relative;
+    overflow: hidden;
+}
+
+.cg-hours-today::before {
+    content: '';
+    position: absolute;
+    top: -2px;
+    left: -2px;
+    right: -2px;
+    bottom: -2px;
+    background: linear-gradient(45deg, #f59e0b, #f97316, #f59e0b);
+    border-radius: 1rem;
+    z-index: -1;
+    animation: glow 3s ease-in-out infinite;
+}
+
+@keyframes glow {
+    0%, 100% { opacity: 0.5; }
+    50% { opacity: 1; }
+}
+
+/* ============================================
+   Gallery with Bohemian Grid
+   ============================================ */
+.cg-gallery {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+}
+
+.cg-gallery-item {
+    position: relative;
+    overflow: hidden;
+    border-radius: 1rem;
+    aspect-ratio: 4/3;
+    cursor: pointer;
+}
+
+.cg-gallery-item img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: all 0.5s ease;
+}
+
+.cg-gallery-item:hover img {
+    transform: scale(1.1) rotate(1deg);
+    filter: brightness(1.1) contrast(1.05);
+}
+
+.cg-gallery-item::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, transparent, rgba(251, 191, 36, 0.1));
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.cg-gallery-item:hover::after {
+    opacity: 1;
+}
+
+/* ============================================
+   Directions Button with Wave Effect
+   ============================================ */
+.cg-directions-btn {
+    background: linear-gradient(135deg, #f59e0b, #f97316);
+    position: relative;
+    overflow: hidden;
+}
+
+.cg-directions-btn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+    transition: left 0.6s ease;
+}
+
+.cg-directions-btn:hover::before {
+    left: 100%;
+}
+
+.cg-directions-btn:hover {
+    transform: translateY(-2px) scale(1.02);
+    box-shadow: 0 20px 25px -5px rgba(245, 158, 11, 0.3);
+}
+
+/* ============================================
+   Nearby Gems Section
+   ============================================ */
+.cg-nearby-card {
+    background: rgba(255, 255, 255, 0.7);
+    backdrop-filter: blur(8px);
+    border: 1px solid rgba(251, 191, 36, 0.2);
+    transition: all 0.3s ease;
+}
+
+.cg-nearby-card:hover {
+    background: rgba(255, 255, 255, 0.9);
+    transform: translateX(4px);
+    box-shadow: 0 10px 15px -3px rgba(251, 191, 36, 0.2);
+}
+
+/* ============================================
+   Responsive Adjustments
+   ============================================ */
+@media (max-width: 768px) {
+    .cg-gallery {
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+        gap: 0.75rem;
+    }
+    
+    .cg-boho-card {
+        margin: 0 -1rem;
+        border-radius: 2rem 2rem 0 0;
+    }
+}
+
+/* ============================================
+   Art Nouveau Inspired Decorations
+   ============================================ */
+.cg-art-nouveau-border {
+    position: relative;
+}
+
+.cg-art-nouveau-border::before,
+.cg-art-nouveau-border::after {
+    content: '';
+    position: absolute;
+    width: 60px;
+    height: 60px;
+    background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M30 5C35 5 40 10 40 15C40 20 35 25 30 25C25 25 20 20 20 15C20 10 25 5 30 5Z' fill='%23fbbf24' fill-opacity='0.1'/%3E%3Cpath d='M30 35C35 35 40 40 40 45C40 50 35 55 30 55C25 55 20 50 20 45C20 40 25 35 30 35Z' fill='%23fbbf24' fill-opacity='0.1'/%3E%3C/svg%3E") no-repeat center;
+    opacity: 0.3;
+}
+
+.cg-art-nouveau-border::before {
+    top: -20px;
+    left: -20px;
+}
+
+.cg-art-nouveau-border::after {
+    bottom: -20px;
+    right: -20px;
+    transform: rotate(180deg);
+}

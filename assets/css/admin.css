@@ -1,0 +1,75 @@
+/**
+ * Capiznon Geo - Admin Styles
+ */
+
+#cg-map-picker {
+    border-radius: 4px;
+    z-index: 1;
+}
+
+.cg-gallery-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    list-style: none;
+    padding: 0;
+    margin: 0 0 10px;
+}
+
+.cg-gallery-item {
+    position: relative;
+    width: 100px;
+    height: 100px;
+    cursor: move;
+}
+
+.cg-gallery-item img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+}
+
+.cg-remove-image {
+    position: absolute;
+    top: -8px;
+    right: -8px;
+    background: #dc3545;
+    color: #fff;
+    border: 2px solid #fff;
+    border-radius: 50%;
+    width: 24px;
+    height: 24px;
+    cursor: pointer;
+    font-size: 14px;
+    line-height: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+
+.cg-remove-image:hover {
+    background: #c82333;
+}
+
+#cg-hours-table input[type="time"] {
+    width: 120px;
+}
+
+#cg-hours-table input[type="checkbox"] {
+    margin: 0;
+}
+
+/* Small status badge for frontend-created pending locations */
+.cg-status-badge.cg-status-pending-frontend {
+    display: inline-block;
+    padding: 2px 6px;
+    border-radius: 9999px;
+    font-size: 11px;
+    line-height: 1.4;
+    background-color: #fff7e6;
+    color: #b7791f;
+    border: 1px solid #f6e0b3;
+}

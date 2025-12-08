@@ -1,0 +1,49 @@
+<svg width="1200" height="900" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#0ea5e9"/>
+      <stop offset="100%" style="stop-color:#0284c7"/>
+    </linearGradient>
+  </defs>
+  
+  <!-- Background -->
+  <rect width="1200" height="900" fill="url(#bg)"/>
+  
+  <!-- Map Pattern -->
+  <g opacity="0.1">
+    <path d="M0 100 L1200 100" stroke="white" stroke-width="1"/>
+    <path d="M0 200 L1200 200" stroke="white" stroke-width="1"/>
+    <path d="M0 300 L1200 300" stroke="white" stroke-width="1"/>
+    <path d="M0 400 L1200 400" stroke="white" stroke-width="1"/>
+    <path d="M0 500 L1200 500" stroke="white" stroke-width="1"/>
+    <path d="M0 600 L1200 600" stroke="white" stroke-width="1"/>
+    <path d="M0 700 L1200 700" stroke="white" stroke-width="1"/>
+    <path d="M0 800 L1200 800" stroke="white" stroke-width="1"/>
+    <path d="M100 0 L100 900" stroke="white" stroke-width="1"/>
+    <path d="M200 0 L200 900" stroke="white" stroke-width="1"/>
+    <path d="M300 0 L300 900" stroke="white" stroke-width="1"/>
+    <path d="M400 0 L400 900" stroke="white" stroke-width="1"/>
+    <path d="M500 0 L500 900" stroke="white" stroke-width="1"/>
+    <path d="M600 0 L600 900" stroke="white" stroke-width="1"/>
+    <path d="M700 0 L700 900" stroke="white" stroke-width="1"/>
+    <path d="M800 0 L800 900" stroke="white" stroke-width="1"/>
+    <path d="M900 0 L900 900" stroke="white" stroke-width="1"/>
+    <path d="M1000 0 L1000 900" stroke="white" stroke-width="1"/>
+    <path d="M1100 0 L1100 900" stroke="white" stroke-width="1"/>
+  </g>
+  
+  <!-- Location Pin Icon -->
+  <g transform="translate(500, 250)">
+    <path d="M100 0 C155.228 0 200 44.772 200 100 C200 175 100 280 100 280 C100 280 0 175 0 100 C0 44.772 44.772 0 100 0 Z" fill="white"/>
+    <circle cx="100" cy="100" r="40" fill="#0ea5e9"/>
+  </g>
+  
+  <!-- Title -->
+  <text x="600" y="620" font-family="system-ui, sans-serif" font-size="72" font-weight="700" fill="white" text-anchor="middle">Capiznon Geo</text>
+  
+  <!-- Subtitle -->
+  <text x="600" y="680" font-family="system-ui, sans-serif" font-size="28" font-weight="400" fill="rgba(255,255,255,0.8)" text-anchor="middle">Interactive Location-Based Theme</text>
+  
+  <!-- Features -->
+  <text x="600" y="780" font-family="system-ui, sans-serif" font-size="18" fill="rgba(255,255,255,0.6)" text-anchor="middle">Maps • Locations • Filters • REST API</text>
+</svg>
