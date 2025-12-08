@@ -88,7 +88,7 @@
                             </p>
                             <p class="flex items-center gap-3">
                                 <span class="w-8 h-8 bg-white/10 rounded-lg flex items-center justify-center flex-shrink-0">📧</span>
-                                hello@capiznongeo.com
+                                hello@capiznon.com
                             </p>
                         </div>
                     <?php endif; ?>
