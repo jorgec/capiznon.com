@@ -62,6 +62,7 @@ class Capiznon_Geo_Scaffold
                     $this->seed_location_types();
                     $this->seed_areas();
                     $this->seed_tags();
+                    $this->seed_vibes();
                     $this->seed_price_ranges();
                     $this->seed_cuisines();
                     $this->create_required_pages();
@@ -80,6 +81,11 @@ class Capiznon_Geo_Scaffold
                     
                 case 'seed_tags':
                     $this->seed_tags();
+                    add_action('admin_notices', [$this, 'show_success_notice']);
+                    break;
+                
+                case 'seed_vibes':
+                    $this->seed_vibes();
                     add_action('admin_notices', [$this, 'show_success_notice']);
                     break;
                     
@@ -271,6 +277,28 @@ class Capiznon_Geo_Scaffold
     }
 
     /**
+     * Seed vibes (location_vibe)
+     */
+    private function seed_vibes()
+    {
+        $vibes = [
+            'cozy-quiet' => __('Quiet & cozy', 'capiznon-geo'),
+            'family-friendly' => __('Family-friendly', 'capiznon-geo'),
+            'insta-worthy' => __('Instagrammable views', 'capiznon-geo'),
+            'lively-night-out' => __('Night out / barkada', 'capiznon-geo'),
+            'romantic' => __('Romantic / special', 'capiznon-geo'),
+        ];
+
+        foreach ($vibes as $slug => $label) {
+            if (!term_exists($slug, 'location_vibe')) {
+                wp_insert_term($label, 'location_vibe', [
+                    'slug' => $slug,
+                ]);
+            }
+        }
+    }
+
+    /**
      * Seed price ranges
      */
     private function seed_price_ranges()
@@ -424,6 +452,34 @@ class Capiznon_Geo_Scaffold
             // Ensure template is set correctly
             update_post_meta($map_page->ID, '_wp_page_template', 'map.php');
         }
+
+        // Create Recommendations page if it doesn't exist
+        $rec_page = get_page_by_path('recommendations');
+        
+        if (!$rec_page) {
+            $rec_page_id = wp_insert_post([
+                'post_title'     => __('Recommendations', 'capiznon-geo'),
+                'post_name'      => 'recommendations',
+                'post_status'    => 'publish',
+                'post_type'      => 'page',
+                'post_content'   => '',
+                'comment_status' => 'closed',
+                'ping_status'    => 'closed',
+            ]);
+            
+            if ($rec_page_id && !is_wp_error($rec_page_id)) {
+                update_post_meta($rec_page_id, '_wp_page_template', 'recommendations.php');
+                // Default recommendation meta
+                update_post_meta($rec_page_id, '_cg_rec_intent', 'any');
+                update_post_meta($rec_page_id, '_cg_rec_vibes', []);
+                update_post_meta($rec_page_id, '_cg_rec_constraints', []);
+                update_post_meta($rec_page_id, '_cg_rec_group', 'any');
+                update_post_meta($rec_page_id, '_cg_rec_lat', '');
+                update_post_meta($rec_page_id, '_cg_rec_lng', '');
+            }
+        } else {
+            update_post_meta($rec_page->ID, '_wp_page_template', 'recommendations.php');
+        }
     }
 
     /**
@@ -491,6 +547,16 @@ class Capiznon_Geo_Scaffold
                             </tr>
                             
                             <tr>
+                                <th scope="row"><?php _e('Vibes', 'capiznon-geo'); ?></th>
+                                <td>
+                                    <p><?php _e('Creates vibe terms like Quiet & cozy, Family-friendly, Romantic, etc.', 'capiznon-geo'); ?></p>
+                                    <button type="submit" name="scaffold_action" value="seed_vibes" class="button">
+                                        <?php _e('Create Vibes', 'capiznon-geo'); ?>
+                                    </button>
+                                </td>
+                            </tr>
+                            
+                            <tr>
                                 <th scope="row"><?php _e('Price Ranges', 'capiznon-geo'); ?></th>
                                 <td>
                                     <p><?php _e('Creates price range categories from Budget to Luxury.', 'capiznon-geo'); ?></p>
@@ -553,20 +619,21 @@ class Capiznon_Geo_Scaffold
                 <h2><?php _e('Current Data Status', 'capiznon-geo'); ?></h2>
                 <table class="widefat">
                     <thead>
-                        <tr>
-                            <th><?php _e('Taxonomy', 'capiznon-geo'); ?></th>
-                            <th><?php _e('Term Count', 'capiznon-geo'); ?></th>
-                            <th><?php _e('Status', 'capiznon-geo'); ?></th>
-                        </tr>
+                    <tr>
+                        <th><?php _e('Taxonomy', 'capiznon-geo'); ?></th>
+                        <th><?php _e('Term Count', 'capiznon-geo'); ?></th>
+                        <th><?php _e('Status', 'capiznon-geo'); ?></th>
+                    </tr>
                     </thead>
                     <tbody>
                         <?php
                         $taxonomies = [
-                            'location_type' => __('Location Types', 'capiznon-geo'),
-                            'location_area' => __('Areas', 'capiznon-geo'),
-                            'location_tag' => __('Tags', 'capiznon-geo'),
-                            'location_price' => __('Price Ranges', 'capiznon-geo'),
-                            'location_cuisine' => __('Cuisines', 'capiznon-geo'),
+                            'location_type'   => __('Location Types', 'capiznon-geo'),
+                            'location_area'   => __('Areas', 'capiznon-geo'),
+                            'location_tag'    => __('Tags', 'capiznon-geo'),
+                            'location_price'  => __('Price Ranges', 'capiznon-geo'),
+                            'location_cuisine'=> __('Cuisines', 'capiznon-geo'),
+                            'location_vibe'   => __('Vibes', 'capiznon-geo'),
                         ];
 
                         foreach ($taxonomies as $taxonomy => $label) {

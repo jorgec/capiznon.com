@@ -105,6 +105,15 @@ function capiznon_geo_enqueue_assets() {
         true
     );
 
+    // Recommender quiz (registered, enqueued when component is used)
+    wp_register_script(
+        'capiznon-geo-recommender-quiz',
+        CAPIZNON_GEO_URI . '/assets/js/recommender-quiz.js',
+        ['capiznon-geo-main'],
+        CAPIZNON_GEO_VERSION,
+        true
+    );
+
     // Localize script with settings
     wp_localize_script('capiznon-geo-map', 'capiznonGeo', [
         'restUrl'    => rest_url('capiznon-geo/v1/'),

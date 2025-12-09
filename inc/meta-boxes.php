@@ -294,6 +294,19 @@ function capiznon_geo_options_callback($post) {
     $featured = get_post_meta($post->ID, '_cg_featured', true);
     $marker_color = get_post_meta($post->ID, '_cg_marker_color', true) ?: '#e74c3c';
     $marker_icon = get_post_meta($post->ID, '_cg_marker_icon', true) ?: 'default';
+    $price_level = get_post_meta($post->ID, '_cg_price_level', true) ?: 'moderate';
+    $beachfront = get_post_meta($post->ID, '_cg_beachfront', true);
+    $indoor_aircon = get_post_meta($post->ID, '_cg_indoor_aircon', true);
+    $parking = get_post_meta($post->ID, '_cg_parking', true);
+    $popularity = get_post_meta($post->ID, '_cg_popularity_score', true);
+
+    $suits = [
+        'solo'    => get_post_meta($post->ID, '_cg_suits_solo', true),
+        'couples' => get_post_meta($post->ID, '_cg_suits_couples', true),
+        'family'  => get_post_meta($post->ID, '_cg_suits_family', true),
+        'barkada' => get_post_meta($post->ID, '_cg_suits_barkada', true),
+        'work'    => get_post_meta($post->ID, '_cg_suits_work', true),
+    ];
     ?>
     <p>
         <label>
@@ -319,6 +332,32 @@ function capiznon_geo_options_callback($post) {
             <option value="beach" <?php selected($marker_icon, 'beach'); ?>><?php _e('Beach', 'capiznon-geo'); ?></option>
             <option value="church" <?php selected($marker_icon, 'church'); ?>><?php _e('Church', 'capiznon-geo'); ?></option>
         </select>
+    </p>
+    <hr>
+    <p>
+        <label for="cg_price_level"><strong><?php _e('Price Level', 'capiznon-geo'); ?></strong></label><br>
+        <select id="cg_price_level" name="cg_price_level" class="widefat">
+            <option value="budget" <?php selected($price_level, 'budget'); ?>><?php _e('Budget', 'capiznon-geo'); ?></option>
+            <option value="moderate" <?php selected($price_level, 'moderate'); ?>><?php _e('Moderate', 'capiznon-geo'); ?></option>
+            <option value="premium" <?php selected($price_level, 'premium'); ?>><?php _e('Premium', 'capiznon-geo'); ?></option>
+        </select>
+    </p>
+    <p>
+        <label><input type="checkbox" name="cg_beachfront" value="1" <?php checked($beachfront, '1'); ?>> <?php _e('Beachfront / nature', 'capiznon-geo'); ?></label><br>
+        <label><input type="checkbox" name="cg_indoor_aircon" value="1" <?php checked($indoor_aircon, '1'); ?>> <?php _e('Indoor / air-conditioned', 'capiznon-geo'); ?></label><br>
+        <label><input type="checkbox" name="cg_parking" value="1" <?php checked($parking, '1'); ?>> <?php _e('Good parking / accessible', 'capiznon-geo'); ?></label>
+    </p>
+    <p>
+        <label for="cg_popularity_score"><strong><?php _e('Popularity Score (0–100)', 'capiznon-geo'); ?></strong></label><br>
+        <input type="number" min="0" max="100" step="1" name="cg_popularity_score" id="cg_popularity_score" value="<?php echo esc_attr($popularity); ?>" class="small-text">
+    </p>
+    <p>
+        <strong><?php _e('Group suitability', 'capiznon-geo'); ?></strong><br>
+        <label><input type="checkbox" name="cg_suits_solo" value="1" <?php checked($suits['solo'], '1'); ?>> <?php _e('Solo', 'capiznon-geo'); ?></label><br>
+        <label><input type="checkbox" name="cg_suits_couples" value="1" <?php checked($suits['couples'], '1'); ?>> <?php _e('Couples', 'capiznon-geo'); ?></label><br>
+        <label><input type="checkbox" name="cg_suits_family" value="1" <?php checked($suits['family'], '1'); ?>> <?php _e('Family with kids', 'capiznon-geo'); ?></label><br>
+        <label><input type="checkbox" name="cg_suits_barkada" value="1" <?php checked($suits['barkada'], '1'); ?>> <?php _e('Barkada / big group', 'capiznon-geo'); ?></label><br>
+        <label><input type="checkbox" name="cg_suits_work" value="1" <?php checked($suits['work'], '1'); ?>> <?php _e('Work / formal', 'capiznon-geo'); ?></label>
     </p>
     <?php
 }
@@ -416,6 +455,27 @@ function capiznon_geo_save_meta($post_id) {
         update_post_meta($post_id, '_cg_marker_icon', sanitize_text_field($_POST['cg_marker_icon']));
     }
 
+    // Amenities / constraints meta
+    if (isset($_POST['cg_price_level'])) {
+        $price_level = sanitize_text_field($_POST['cg_price_level']);
+        update_post_meta($post_id, '_cg_price_level', $price_level);
+    }
+    update_post_meta($post_id, '_cg_beachfront', isset($_POST['cg_beachfront']) ? '1' : '');
+    update_post_meta($post_id, '_cg_indoor_aircon', isset($_POST['cg_indoor_aircon']) ? '1' : '');
+    update_post_meta($post_id, '_cg_parking', isset($_POST['cg_parking']) ? '1' : '');
+
+    if (isset($_POST['cg_popularity_score'])) {
+        $pop = $_POST['cg_popularity_score'] === '' ? '' : max(0, min(100, floatval($_POST['cg_popularity_score'])));
+        update_post_meta($post_id, '_cg_popularity_score', $pop);
+    }
+
+    // Group suitability flags
+    update_post_meta($post_id, '_cg_suits_solo', isset($_POST['cg_suits_solo']) ? '1' : '');
+    update_post_meta($post_id, '_cg_suits_couples', isset($_POST['cg_suits_couples']) ? '1' : '');
+    update_post_meta($post_id, '_cg_suits_family', isset($_POST['cg_suits_family']) ? '1' : '');
+    update_post_meta($post_id, '_cg_suits_barkada', isset($_POST['cg_suits_barkada']) ? '1' : '');
+    update_post_meta($post_id, '_cg_suits_work', isset($_POST['cg_suits_work']) ? '1' : '');
+
     // Gallery
     if (isset($_POST['cg_gallery']) && is_array($_POST['cg_gallery'])) {
         $gallery = array_map('absint', $_POST['cg_gallery']);
@@ -450,6 +510,16 @@ function capiznon_geo_register_meta() {
         '_cg_marker_icon'        => ['type' => 'string'],
         '_cg_is_24_hours'        => ['type' => 'boolean'],
         '_cg_temporarily_closed' => ['type' => 'boolean'],
+        '_cg_price_level'        => ['type' => 'string'],
+        '_cg_beachfront'         => ['type' => 'boolean'],
+        '_cg_indoor_aircon'      => ['type' => 'boolean'],
+        '_cg_parking'            => ['type' => 'boolean'],
+        '_cg_popularity_score'   => ['type' => 'number'],
+        '_cg_suits_solo'         => ['type' => 'boolean'],
+        '_cg_suits_couples'      => ['type' => 'boolean'],
+        '_cg_suits_family'       => ['type' => 'boolean'],
+        '_cg_suits_barkada'      => ['type' => 'boolean'],
+        '_cg_suits_work'         => ['type' => 'boolean'],
     ];
 
     foreach ($meta_fields as $key => $args) {
@@ -464,3 +534,212 @@ function capiznon_geo_register_meta() {
     }
 }
 add_action('init', 'capiznon_geo_register_meta');
+
+/**
+ * Register Recommendation meta box for Recommendations page template
+ */
+function capiznon_geo_register_recommendation_metabox() {
+    add_meta_box(
+        'cg_recommendation_defaults',
+        __('Recommendation Defaults', 'capiznon-geo'),
+        'capiznon_geo_recommendation_metabox_callback',
+        'page',
+        'side',
+        'default'
+    );
+}
+add_action('add_meta_boxes_page', 'capiznon_geo_register_recommendation_metabox');
+
+function capiznon_geo_recommendation_metabox_callback($post) {
+    $template = get_page_template_slug($post->ID);
+    if ($template !== 'recommendations.php') {
+        echo '<p class="description">' . esc_html__('Assign the "Recommendations" template to use these defaults.', 'capiznon-geo') . '</p>';
+        return;
+    }
+
+    wp_nonce_field('cg_recommendation_meta', 'cg_recommendation_nonce');
+
+    $intent      = get_post_meta($post->ID, '_cg_rec_intent', true) ?: 'any';
+    $vibes       = get_post_meta($post->ID, '_cg_rec_vibes', true);
+    $constraints = get_post_meta($post->ID, '_cg_rec_constraints', true);
+    $group       = get_post_meta($post->ID, '_cg_rec_group', true) ?: 'any';
+    $lat         = get_post_meta($post->ID, '_cg_rec_lat', true);
+    $lng         = get_post_meta($post->ID, '_cg_rec_lng', true);
+
+    $vibes = is_array($vibes) ? $vibes : [];
+    $constraints = is_array($constraints) ? $constraints : [];
+
+    $intent_options = [
+        'any'           => __('Surprise me', 'capiznon-geo'),
+        'food-dining'   => __('Eat & drink', 'capiznon-geo'),
+        'accommodation' => __('Places to stay', 'capiznon-geo'),
+        'attractions'   => __('Things to see', 'capiznon-geo'),
+        'shopping'      => __('Shopping', 'capiznon-geo'),
+    ];
+
+    $vibe_options = [
+        'cozy-quiet'       => __('Quiet & cozy', 'capiznon-geo'),
+        'family-friendly'  => __('Family-friendly', 'capiznon-geo'),
+        'insta-worthy'     => __('Instagrammable views', 'capiznon-geo'),
+        'lively-night-out' => __('Night out / barkada', 'capiznon-geo'),
+        'romantic'         => __('Romantic / special', 'capiznon-geo'),
+        'any'              => __("I don't mind", 'capiznon-geo'),
+    ];
+
+    $constraint_options = [
+        'near'          => __('Near me / short ride', 'capiznon-geo'),
+        'budget'        => __('Budget-friendly', 'capiznon-geo'),
+        'open-now'      => __('Open now / tonight', 'capiznon-geo'),
+        'beachfront'    => __('Beachfront / nature', 'capiznon-geo'),
+        'indoor-aircon' => __('Air-conditioned / indoor', 'capiznon-geo'),
+        'parking'       => __('Good parking / accessible', 'capiznon-geo'),
+    ];
+
+    $groups = [
+        'any'     => __('No preference', 'capiznon-geo'),
+        'solo'    => __('Just me', 'capiznon-geo'),
+        'couple'  => __('Couple', 'capiznon-geo'),
+        'family'  => __('Family with kids', 'capiznon-geo'),
+        'barkada' => __('Barkada / big group', 'capiznon-geo'),
+        'work'    => __('Work / formal', 'capiznon-geo'),
+    ];
+    ?>
+    <p>
+        <label for="cg_rec_intent"><strong><?php esc_html_e('Intent', 'capiznon-geo'); ?></strong></label><br>
+        <select name="cg_rec_intent" id="cg_rec_intent" class="widefat">
+            <?php foreach ($intent_options as $val => $label) : ?>
+                <option value="<?php echo esc_attr($val); ?>" <?php selected($intent, $val); ?>><?php echo esc_html($label); ?></option>
+            <?php endforeach; ?>
+        </select>
+    </p>
+    <p>
+        <strong><?php esc_html_e('Vibes (multi-select)', 'capiznon-geo'); ?></strong><br>
+        <?php foreach ($vibe_options as $val => $label) : ?>
+            <label style="display:block;margin-bottom:4px;">
+                <input type="checkbox" name="cg_rec_vibes[]" value="<?php echo esc_attr($val); ?>" <?php checked(in_array($val, $vibes, true)); ?>>
+                <?php echo esc_html($label); ?>
+            </label>
+        <?php endforeach; ?>
+    </p>
+    <p>
+        <strong><?php esc_html_e('Constraints (multi-select)', 'capiznon-geo'); ?></strong><br>
+        <?php foreach ($constraint_options as $val => $label) : ?>
+            <label style="display:block;margin-bottom:4px;">
+                <input type="checkbox" name="cg_rec_constraints[]" value="<?php echo esc_attr($val); ?>" <?php checked(in_array($val, $constraints, true)); ?>>
+                <?php echo esc_html($label); ?>
+            </label>
+        <?php endforeach; ?>
+    </p>
+    <p>
+        <label for="cg_rec_group"><strong><?php esc_html_e('Group', 'capiznon-geo'); ?></strong></label><br>
+        <select name="cg_rec_group" id="cg_rec_group" class="widefat">
+            <?php foreach ($groups as $val => $label) : ?>
+                <option value="<?php echo esc_attr($val); ?>" <?php selected($group, $val); ?>><?php echo esc_html($label); ?></option>
+            <?php endforeach; ?>
+        </select>
+    </p>
+    <p>
+        <label for="cg_rec_lat"><strong><?php esc_html_e('Latitude (optional)', 'capiznon-geo'); ?></strong></label>
+        <input type="text" name="cg_rec_lat" id="cg_rec_lat" value="<?php echo esc_attr($lat); ?>" class="widefat" placeholder="11.58">
+    </p>
+    <p>
+        <label for="cg_rec_lng"><strong><?php esc_html_e('Longitude (optional)', 'capiznon-geo'); ?></strong></label>
+        <input type="text" name="cg_rec_lng" id="cg_rec_lng" value="<?php echo esc_attr($lng); ?>" class="widefat" placeholder="122.75">
+    </p>
+    <p class="description"><?php esc_html_e('Defaults apply when this page is used as the Recommendations target.', 'capiznon-geo'); ?></p>
+    <?php
+}
+
+function capiznon_geo_save_recommendation_meta($post_id) {
+    if (!isset($_POST['cg_recommendation_nonce']) || !wp_verify_nonce($_POST['cg_recommendation_nonce'], 'cg_recommendation_meta')) {
+        return;
+    }
+    if (defined('DOING_AUTOSAVE') && DOING_AUTOSAVE) {
+        return;
+    }
+    if (!current_user_can('edit_post', $post_id)) {
+        return;
+    }
+
+    $template = get_page_template_slug($post_id);
+    if ($template !== 'recommendations.php') {
+        return;
+    }
+
+    $allowed_intent = ['any', 'food-dining', 'accommodation', 'attractions', 'shopping'];
+    $intent = isset($_POST['cg_rec_intent']) ? sanitize_text_field($_POST['cg_rec_intent']) : 'any';
+    if (!in_array($intent, $allowed_intent, true)) {
+        $intent = 'any';
+    }
+    update_post_meta($post_id, '_cg_rec_intent', $intent);
+
+    $allowed_vibes = ['cozy-quiet', 'family-friendly', 'insta-worthy', 'lively-night-out', 'romantic', 'any'];
+    $vibes = [];
+    if (!empty($_POST['cg_rec_vibes']) && is_array($_POST['cg_rec_vibes'])) {
+        foreach ($_POST['cg_rec_vibes'] as $v) {
+            $v = sanitize_text_field($v);
+            if (in_array($v, $allowed_vibes, true)) {
+                $vibes[] = $v;
+            }
+        }
+    }
+    update_post_meta($post_id, '_cg_rec_vibes', array_values(array_unique($vibes)));
+
+    $allowed_constraints = ['near', 'budget', 'open-now', 'beachfront', 'indoor-aircon', 'parking'];
+    $constraints = [];
+    if (!empty($_POST['cg_rec_constraints']) && is_array($_POST['cg_rec_constraints'])) {
+        foreach ($_POST['cg_rec_constraints'] as $c) {
+            $c = sanitize_text_field($c);
+            if (in_array($c, $allowed_constraints, true)) {
+                $constraints[] = $c;
+            }
+        }
+    }
+    update_post_meta($post_id, '_cg_rec_constraints', array_values(array_unique($constraints)));
+
+    $allowed_groups = ['any', 'solo', 'couple', 'family', 'barkada', 'work'];
+    $group = isset($_POST['cg_rec_group']) ? sanitize_text_field($_POST['cg_rec_group']) : 'any';
+    if (!in_array($group, $allowed_groups, true)) {
+        $group = 'any';
+    }
+    update_post_meta($post_id, '_cg_rec_group', $group);
+
+    $lat = isset($_POST['cg_rec_lat']) && is_numeric($_POST['cg_rec_lat']) ? floatval($_POST['cg_rec_lat']) : '';
+    $lng = isset($_POST['cg_rec_lng']) && is_numeric($_POST['cg_rec_lng']) ? floatval($_POST['cg_rec_lng']) : '';
+    update_post_meta($post_id, '_cg_rec_lat', $lat);
+    update_post_meta($post_id, '_cg_rec_lng', $lng);
+}
+add_action('save_post_page', 'capiznon_geo_save_recommendation_meta');
+
+/**
+ * Register recommendation defaults meta for REST
+ */
+function capiznon_geo_register_recommendation_meta() {
+    $fields = [
+        '_cg_rec_intent'      => ['type' => 'string'],
+        '_cg_rec_vibes'       => ['type' => 'array', 'items' => ['type' => 'string']],
+        '_cg_rec_constraints' => ['type' => 'array', 'items' => ['type' => 'string']],
+        '_cg_rec_group'       => ['type' => 'string'],
+        '_cg_rec_lat'         => ['type' => 'number'],
+        '_cg_rec_lng'         => ['type' => 'number'],
+    ];
+
+    foreach ($fields as $key => $args) {
+        register_post_meta('page', $key, [
+            'show_in_rest'  => isset($args['items'])
+                ? [
+                    'schema' => [
+                        'type'  => 'array',
+                        'items' => $args['items'],
+                    ],
+                ]
+                : true,
+            'single'        => true,
+            'type'          => $args['type'],
+            'auth_callback' => function() {
+                return current_user_can('edit_posts');
+            },
+        ]);
+    }
+}
+add_action('init', 'capiznon_geo_register_recommendation_meta');

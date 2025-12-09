@@ -164,6 +164,37 @@ function capiznon_geo_register_taxonomies() {
         'show_in_rest'      => true,
         'rewrite'           => ['slug' => 'cuisine', 'with_front' => false],
     ]);
+
+    // Location Vibe (non-hierarchical)
+    $vibe_labels = [
+        'name'                       => _x('Location Vibes', 'taxonomy general name', 'capiznon-geo'),
+        'singular_name'              => _x('Location Vibe', 'taxonomy singular name', 'capiznon-geo'),
+        'search_items'               => __('Search Vibes', 'capiznon-geo'),
+        'all_items'                  => __('All Vibes', 'capiznon-geo'),
+        'edit_item'                  => __('Edit Vibe', 'capiznon-geo'),
+        'update_item'                => __('Update Vibe', 'capiznon-geo'),
+        'add_new_item'               => __('Add New Vibe', 'capiznon-geo'),
+        'new_item_name'              => __('New Vibe Name', 'capiznon-geo'),
+        'menu_name'                  => __('Vibes', 'capiznon-geo'),
+        'popular_items'              => __('Popular Vibes', 'capiznon-geo'),
+        'separate_items_with_commas' => __('Separate vibes with commas', 'capiznon-geo'),
+        'add_or_remove_items'        => __('Add or remove vibes', 'capiznon-geo'),
+        'choose_from_most_used'      => __('Choose from the most used vibes', 'capiznon-geo'),
+        'not_found'                  => __('No vibes found.', 'capiznon-geo'),
+        'back_to_items'              => __('← Back to Vibes', 'capiznon-geo'),
+    ];
+
+    register_taxonomy('location_vibe', ['cg_location'], [
+        'labels'            => $vibe_labels,
+        'hierarchical'      => false,
+        'public'            => true,
+        'show_ui'           => true,
+        'show_admin_column' => false,
+        'show_in_nav_menus' => false,
+        'show_tagcloud'     => false,
+        'show_in_rest'      => true,
+        'rewrite'           => ['slug' => 'vibe', 'with_front' => false],
+    ]);
 }
 add_action('init', 'capiznon_geo_register_taxonomies');
 
@@ -286,6 +317,21 @@ function capiznon_geo_insert_default_terms() {
     foreach ($cuisines as $slug) {
         if (!term_exists($slug, 'location_cuisine')) {
             wp_insert_term(ucwords(str_replace('-', ' ', $slug)), 'location_cuisine', ['slug' => $slug]);
+        }
+    }
+
+    // Default Vibes
+    $vibes = [
+        'cozy-quiet'      => __('Quiet & cozy', 'capiznon-geo'),
+        'family-friendly' => __('Family-friendly', 'capiznon-geo'),
+        'insta-worthy'    => __('Instagrammable views', 'capiznon-geo'),
+        'lively-night-out'=> __('Night out / barkada', 'capiznon-geo'),
+        'romantic'        => __('Romantic / special', 'capiznon-geo'),
+    ];
+
+    foreach ($vibes as $slug => $label) {
+        if (!term_exists($slug, 'location_vibe')) {
+            wp_insert_term($label, 'location_vibe', ['slug' => $slug]);
         }
     }
 

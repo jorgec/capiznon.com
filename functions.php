@@ -46,6 +46,7 @@ require_once CAPIZNON_GEO_DIR . '/inc/post-types.php';
 require_once CAPIZNON_GEO_DIR . '/inc/taxonomies.php';
 require_once CAPIZNON_GEO_DIR . '/inc/meta-boxes.php';
 require_once CAPIZNON_GEO_DIR . '/inc/rest-api.php';
+require_once CAPIZNON_GEO_DIR . '/inc/recommender.php';
 require_once CAPIZNON_GEO_DIR . '/inc/template-functions.php';
 require_once CAPIZNON_GEO_DIR . '/inc/assets.php';
 require_once CAPIZNON_GEO_DIR . '/inc/visits.php';

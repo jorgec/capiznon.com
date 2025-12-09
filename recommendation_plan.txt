@@ -1,0 +1,484 @@
+Implementation plan for Capiznon triage/recommender feature
+===========================================================
+
+Goal:
+Create a small recommendation flow for cg_location that:
+- Asks 4 quick questions (intent, vibe, constraints, group).
+- Calls a PHP service module (recommender.php) to compute recommendations.
+- Displays results on a dedicated recommendations.php page template.
+- Provides a reusable quiz component/snippet that can be dropped into any theme template and which loads the required JS/CSS to run the mini survey.
+
+This plan covers Steps 1–5: all decisions about questions, parameters, mappings, architecture, and behavior are already made. The coding agent should just implement.
+
+------------------------------------------------------------
+Step 1 – Define questions, URL parameters, and mappings
+------------------------------------------------------------
+
+1.1. Use these 4 questions in the quiz (front-end):
+
+Question 1 – Intent (single choice)
+Parameter: cg_intent
+Options and values:
+- Eat & drink          => food-dining
+- Places to stay       => accommodation
+- Things to see        => attractions
+- Shopping             => shopping
+- Surprise me          => any
+
+Question 2 – Vibe (single choice)
+Parameter: cg_vibe
+Options and values:
+- Quiet & cozy             => cozy-quiet
+- Family-friendly          => family-friendly
+- Instagrammable views     => insta-worthy
+- Night out / barkada      => lively-night-out
+- Romantic / special       => romantic
+- I don’t mind             => any
+
+Question 3 – Practical constraints (multi select)
+Parameter: cg_constraints (comma-separated list)
+Values:
+- near             => Near me / short ride
+- budget           => Budget-friendly
+- open-now         => Open now / tonight
+- beachfront       => Beachfront / nature
+- indoor-aircon    => Air-conditioned / indoor
+- parking          => Good parking / accessible
+
+Question 4 – Group/context (single choice)
+Parameter: cg_group
+Options and values:
+- Just me              => solo
+- Couple               => couple
+- Family with kids     => family
+- Barkada / big group  => barkada
+- Work / formal        => work
+- Skipped/default      => any
+
+Optional geolocation parameters (used only when "near" is selected and user grants permission):
+- cg_lat (float)
+- cg_lng (float)
+
+1.2. Map parameters to existing taxonomies and meta fields:
+
+Intent -> location_type taxonomy:
+- food-dining     => [food-dining, restaurants, cafes, bars, street-food, bakeries]
+- accommodation   => [accommodation, hotels, resorts, guesthouses, homestays, hostels]
+- attractions     => [attractions, beaches, historical, parks, museums, religious]
+- shopping        => [shopping, markets, malls, souvenirs, local-products]
+- any             => no location_type filter
+
+Vibe -> location_vibe taxonomy (agent must ensure taxonomy exists and is registered):
+- cozy-quiet
+- family-friendly
+- insta-worthy
+- lively-night-out
+- romantic
+
+Group suitability -> boolean meta fields on cg_location posts:
+- solo     => _cg_suits_solo
+- couple   => _cg_suits_couples
+- family   => _cg_suits_family
+- barkada  => _cg_suits_barkada
+- work     => _cg_suits_work
+
+Constraints -> meta and coordinates:
+- budget          => _cg_price_level in {budget, mid, premium}
+- beachfront      => _cg_beachfront (boolean)
+- indoor-aircon   => _cg_indoor_aircon (boolean)
+- parking         => _cg_parking (boolean)
+- open-now        => stub for now (no real schedule logic yet, but keep a hook in scoring)
+- near            => use same coordinate meta that existing capiznon-geo location REST endpoints use (agent should reuse existing meta keys for lat/lng)
+
+Optional popularity:
+- If available, meta _cg_popularity_score (numeric 0–100) can be used in scoring.
+
+------------------------------------------------------------
+Step 2 – Implement service module: inc/recommender.php
+------------------------------------------------------------
+
+Goal:
+Implement a pure business-logic module that takes normalized request parameters and returns a structured recommendation payload. No HTML rendering here.
+
+2.1. File placement and loading:
+- Create: wp-content/themes/capiznon-geo/inc/recommender.php
+- In functions.php (or core theme bootstrap), require this file:
+  require_once get_template_directory() . '/inc/recommender.php';
+
+2.2. Public interface:
+
+Create a class Capiznon_Geo_Recommender with the following static methods:
+
+1) normalize_params(array $raw): array
+   - Input: $_GET-like array with keys cg_intent, cg_vibe, cg_constraints, cg_group, cg_lat, cg_lng.
+   - Responsibilities:
+     - Sanitize and validate allowed enum values.
+     - Normalize missing or invalid values to defaults.
+     - Split cg_constraints into an array by comma.
+     - Convert cg_lat and cg_lng to floats where valid.
+   - Output array keys:
+     - intent (string: food-dining, accommodation, attractions, shopping, any)
+     - vibe (string: values defined above or any)
+     - constraints (array of strings: near, budget, open-now, beachfront, indoor-aircon, parking)
+     - group (string: solo, couple, family, barkada, work, any)
+     - lat (float|null)
+     - lng (float|null)
+     - limit (int, default 24)
+     - radius_km (float, default 5, only if "near" is in constraints and lat/lng are present)
+
+2) get_recommendations(array $params): array
+   - Uses normalized parameters.
+   - Builds a WP_Query using build_query_args.
+   - Iterates over retrieved posts and computes a score for each using score_location.
+   - Sorts results by score descending, with a deterministic secondary sort (e.g. title).
+   - Constructs and returns a structured result payload.
+
+3) build_query_args(array $params): array (protected)
+   - Returns an array suitable for WP_Query:
+     - post_type = 'cg_location'
+     - posts_per_page = reasonable upper bound for scoring, e.g. 50.
+     - tax_query:
+       - If intent != 'any': filter by mapped location_type terms.
+       - If vibe != 'any': filter by location_vibe term as a soft filter (only if you want to reduce dataset; otherwise vibe can be handled purely in scoring).
+     - For now, do not attempt to implement distance or open-now filters at query level; they will be handled in scoring.
+
+4) score_location(WP_Post $post, array $params): array (protected)
+   - Reads taxonomies and meta for the post.
+   - Computes:
+     - score (float)
+     - matched_tags (array of short human-readable labels for explanation)
+     - distance_km (float|null) if lat/lng and "near" are provided and coordinates present.
+   - See scoring rules in section 2.3.
+
+2.3. Scoring rules:
+
+Within score_location, implement the following scoring algorithm:
+
+- Initialize:
+  score = 10
+  matched_tags = []
+
+- Intent:
+  If params['intent'] is not 'any' and post has any location_type term mapped to that intent:
+    score += 20
+    matched_tags[] = "Food & Dining" or corresponding label for the selected intent
+
+- Vibe:
+  If params['vibe'] is not 'any' and post has matching location_vibe term:
+    score += 15
+    matched_tags[] = a human label such as "Cozy & quiet", "Family-friendly", etc.
+
+- Group suitability:
+  If params['group'] is not 'any':
+    - Map group to corresponding meta key:
+      solo    -> _cg_suits_solo
+      couple  -> _cg_suits_couples
+      family  -> _cg_suits_family
+      barkada -> _cg_suits_barkada
+      work    -> _cg_suits_work
+    - If that meta key is truthy:
+      score += 12
+      matched_tags[] = e.g. "Good for couples", "Family-friendly", "Great for barkada", etc.
+
+- Constraints:
+  For each constraint in params['constraints']:
+    budget:
+      If _cg_price_level == 'budget':
+        score += 10
+        matched_tags[] = "Budget-friendly"
+    beachfront:
+      If _cg_beachfront is truthy:
+        score += 10
+        matched_tags[] = "Beachfront / nature"
+    indoor-aircon:
+      If _cg_indoor_aircon is truthy:
+        score += 8
+        matched_tags[] = "Indoor / air-conditioned"
+    parking:
+      If _cg_parking is truthy:
+        score += 6
+        matched_tags[] = "Good parking"
+    open-now:
+      For now, add no score but keep a hook:
+        score += 0
+        (optionally add matched_tags[] = "Open now" once logic is implemented)
+    near:
+      If params['lat'] and params['lng'] are set and the post has coordinates:
+        - Compute distance_km between user lat/lng and post coords.
+        - If distance_km <= radius_km:
+            score += 15
+            matched_tags[] = "Near you"
+        - Else if distance_km <= 2 * radius_km:
+            score += 8
+            matched_tags[] = "Within short ride"
+
+- Popularity:
+  If meta _cg_popularity_score exists and is numeric 0–100:
+    contribution = min(15, popularity_score / 10)
+    score += contribution
+    matched_tags[] can optionally include something like "Popular choice" if popularity_score is high.
+
+- Jitter:
+  Add a small random noise (e.g. rand(0, 3) or mt_rand) to score to break ties and keep lists feeling fresh:
+    score += small_random_value
+
+Return for each post:
+- score (float)
+- matched_tags (array)
+- distance_km (float|null)
+
+2.4. Output structure of get_recommendations:
+
+get_recommendations should return an array like:
+
+[
+  'params' => normalized_params_array,
+  'explanation' => array of short human-readable labels based on user choices (for example ["Food & Dining", "Cozy & quiet", "Budget-friendly", "Good for couples"]),
+  'results' => [
+    [
+      'ID'           => (int),
+      'title'        => (string),
+      'permalink'    => (string),
+      'thumbnail_url'=> (string) or fallback,
+      'distance_km'  => (float|null),
+      'score'        => (float),
+      'tags'         => matched_tags array (short descriptive labels)
+    ],
+    ...
+  ]
+]
+
+Sort 'results' by 'score' descending, and then e.g. title ascending as tie-breaker.
+
+Note: HTML escaping should be done at render time, not inside this module. This module should focus on sanitizing inputs and structuring data.
+
+------------------------------------------------------------
+Step 3 – Create recommendations.php page template
+------------------------------------------------------------
+
+Goal:
+Create a dedicated page template to show the recommendations from the recommender service.
+
+3.1. File and template registration:
+- Create wp-content/themes/capiznon-geo/recommendations.php
+- At the top, add a standard WP template comment:
+  /*
+   Template Name: Recommendations
+  */
+- In WordPress admin, create a Page (e.g. title "Recommendations", slug "recommendations") and assign this template to it.
+- This page's permalink will be used by the quiz JS to redirect with query parameters.
+
+3.2. Data flow in recommendations.php:
+
+Inside the template:
+
+1) Call get_header() and any theme shell markup (e.g. main container wrappers used in front-page.php).
+
+2) Collect raw parameters from $_GET:
+   $raw = $_GET;
+
+3) Call:
+   $params = Capiznon_Geo_Recommender::normalize_params( $raw );
+   $data   = Capiznon_Geo_Recommender::get_recommendations( $params );
+
+4) Extract:
+   $explanation = $data['explanation']; // array of strings
+   $results     = $data['results'];     // array of recommendation arrays
+
+5) Render content:
+   - Page title: e.g. "Places for you" or "Recommendations".
+   - A small line "Because you chose: ..." using the explanation array joined by separators.
+   - A grid or list of cards for each result.
+     - For each result, you can:
+       a) Either re-query WP_Post by ID and reuse existing template-parts/card-location-carousel.
+       b) Or create a simple internal card template that uses $result['title'], $result['permalink'], $result['thumbnail_url'], and $result['tags'].
+
+6) Empty state:
+   - If no results, display a helpful message like:
+     "We don't have a good match for those choices yet. Try adjusting your answers or browse all places."
+   - Include links to main cg_location archive or front page.
+
+Make sure you escape output values appropriately (esc_html, esc_url) in this template.
+
+3.3. URL and parameter contract:
+
+The recommendations page must accept:
+- cg_intent
+- cg_vibe
+- cg_constraints
+- cg_group
+- cg_lat (optional)
+- cg_lng (optional)
+
+The quiz JS will build a URL like:
+  /recommendations/?cg_intent=food-dining&cg_vibe=cozy-quiet&cg_constraints=budget,near&cg_group=couple&cg_lat=...&cg_lng=...
+
+Do not change these parameter names in this step; they are the contract between the front-end and the recommender service.
+
+------------------------------------------------------------
+Step 4 – Create reusable quiz snippet/template
+------------------------------------------------------------
+
+Goal:
+Provide a PHP template part that renders the triage quiz UI and ensures that the associated JS is loaded. This snippet should be easily dropped into front-page.php or any other template.
+
+4.1. File placement:
+
+Create: wp-content/themes/capiznon-geo/template-parts/component-recommender-quiz.php
+
+4.2. Responsibilities of component-recommender-quiz.php:
+
+- Render a container element that will serve as the quiz root. Example:
+  <section id="cg-recommender-quiz" data-cg-recommender-root>
+    ...
+  </section>
+
+- Inside, render:
+  - A small heading, e.g. "Not sure where to go?"
+  - A subtitle, e.g. "Answer a few quick questions and we’ll suggest some places."
+  - A step indicator: "Step X of 4" (can be simple text).
+  - Four logical steps for the questions defined in Step 1:
+    Step 1: intent chips
+    Step 2: vibe chips
+    Step 3: constraints chips (multi-select)
+    Step 4: group chips
+
+- For each answer chip/button, use:
+  - Data attributes for step and value, for example:
+    data-cg-step="1" data-cg-answer="food-dining"
+    data-cg-step="3" data-cg-answer="near"
+  - A CSS class that JS can toggle for active state (e.g. "cg-quiz-chip").
+
+- Provide navigation:
+  - "Next" and "Back" buttons, or auto-advance logic:
+    For a first version, you can use explicit "Next" and "Back" buttons with data attributes for JS.
+
+- Provide a main action button at the final step:
+  - A button with an id or data attribute like:
+    <button type="button" id="cg-quiz-submit" data-cg-quiz-submit>Show places</button>
+
+4.3. Enqueueing JS and passing recommendations URL:
+
+In the same template or via an action hook, ensure:
+
+- There is a script file, e.g. /assets/js/recommender-quiz.js, enqueued when this component is used.
+  Example approach:
+  - In functions.php define a function to register/enqueue 'capiznon-geo-recommender-quiz' script.
+  - Inside component-recommender-quiz.php, call a helper (or do_wp_enqueue_script) to make sure the script is loaded.
+
+- Pass the recommendations page URL to the script using wp_localize_script or wp_add_inline_script.
+  Example data to localize:
+  - recommendationsUrl: permalink to the Recommendations page.
+  - You can compute it in PHP:
+    $recommendations_page = get_page_by_path('recommendations');
+    $recommendations_url = $recommendations_page ? get_permalink($recommendations_page->ID) : home_url('/recommendations/');
+
+4.4. Integrating into front-page.php:
+
+In front-page.php (or other templates), insert:
+  get_template_part('template-parts/component', 'recommender-quiz');
+
+Place it under the search bar or wherever fits the layout.
+
+------------------------------------------------------------
+Step 5 – Implement front-end quiz JavaScript behavior
+------------------------------------------------------------
+
+Goal:
+Implement a JS module (recommender-quiz.js) that controls the quiz, collects answers, optionally requests geolocation, and redirects to the recommendations page with the correct query parameters.
+
+5.1. File:
+
+Create: wp-content/themes/capiznon-geo/assets/js/recommender-quiz.js
+(Adjust path to match existing theme asset structure.)
+
+Ensure it is registered and enqueued as described in Step 4.
+
+5.2. Internal state and initialization:
+
+- On DOMContentLoaded:
+  - Locate the quiz root element using e.g. document.querySelector('[data-cg-recommender-root]').
+  - If not found, exit early.
+  - Initialize a state object:
+    state = {
+      intent: 'any',
+      vibe: 'any',
+      constraints: [],
+      group: 'any',
+      lat: null,
+      lng: null
+    }
+  - Track currentStep = 1.
+
+5.3. Handling answer selection:
+
+- Attach click event listeners to all answer chips/buttons inside the quiz root.
+- For single-choice questions (intent, vibe, group):
+  - When a chip for a given step is clicked:
+    - Remove "active" class from other chips in the same step.
+    - Add "active" class to the clicked chip.
+    - Set state.intent / state.vibe / state.group to the chip’s data-cg-answer value.
+    - Optionally auto-advance to the next step.
+
+- For multi-select constraints (step 3):
+  - When a constraint chip is clicked:
+    - Toggle its "active" class.
+    - Add or remove its data-cg-answer value from state.constraints array.
+
+5.4. Navigation between steps:
+
+- Implement simple next/back logic:
+  - "Next" button increases currentStep up to 4.
+  - "Back" button decreases currentStep down to 1.
+  - Show or hide step containers based on currentStep.
+  - Update the step indicator text accordingly.
+
+- Optionally, auto-advance when a single-choice chip is selected, but keep "Back" available.
+
+5.5. Geolocation behavior (for "near" constraint):
+
+- On clicking the "Show places" submit button:
+  - Check if "near" is in state.constraints.
+  - If not, skip geolocation and go directly to building the URL.
+  - If yes:
+    - Check if navigator.geolocation is available.
+    - If not available:
+      - Proceed without lat/lng; keep "near" in constraints.
+    - If available:
+      - Disable the submit button temporarily and show a "Finding your location..." state.
+      - Call navigator.geolocation.getCurrentPosition:
+        - On success:
+          - Set state.lat and state.lng from position.coords.
+          - Proceed to build the URL and redirect.
+        - On error or user denial:
+          - Proceed without lat/lng; keep "near" in constraints.
+      - Re-enable the button when done.
+
+5.6. Building the redirect URL:
+
+- Use the recommendationsUrl value localized from PHP (e.g. window.cgRecommenderData.recommendationsUrl).
+- Build a params object:
+  - cg_intent = state.intent or 'any'
+  - cg_vibe = state.vibe or 'any'
+  - cg_group = state.group or 'any'
+  - cg_constraints = state.constraints joined by comma if length > 0
+  - cg_lat and cg_lng only if state.lat and state.lng are not null
+
+- Serialize to query string:
+  - For each key/value pair:
+    - Skip null or empty values (except for cg_intent/cg_vibe/cg_group defaults).
+    - URL-encode key and value.
+    - Join with &.
+- Final URL:
+  recommendationsUrl + '?' + queryString
+- Set window.location.href to this URL.
+
+5.7. Basic validation and UX safeguards:
+
+- If state.intent is still 'any' and you want to encourage choosing a category:
+  - Option A: Allow 'any' (Surprise me) as a legitimate default.
+  - Option B: If you prefer requiring an explicit choice, show a small error message and do not submit.
+- Ensure the submit button is not clickable multiple times during geolocation.
+- Keep everything defensive: do not rely on arbitrary values in data attributes; if needed, validate that each selected value is one of the known enums before including it in the query string.
+
+End of plan.

@@ -28,9 +28,15 @@ $user_name = $current_user->ID ? $current_user->display_name : __('Explorer', 'c
                 </p>
             </div>
             <div class="flex items-center gap-3">
-                <a href="<?php echo esc_url(home_url('/map/')); ?>" class="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center text-gray-600 hover:bg-gray-200 transition-colors">
+                <div class="flex items-center gap-2">
+                    <button type="button" id="cg-open-quiz" class="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center text-gray-700 hover:bg-gray-200 transition-colors" aria-label="<?php esc_attr_e('Open quick quiz', 'capiznon-geo'); ?>">
+                        <span aria-hidden="true">🎯</span>
+                    </button>
+                    <span class="text-xs font-semibold text-gray-600 hidden sm:inline"><?php esc_html_e('Need help?', 'capiznon-geo'); ?></span>
+                </div>
+                <!-- <a href="<?php echo esc_url(home_url('/map/')); ?>" class="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center text-gray-600 hover:bg-gray-200 transition-colors">
                     <span>🗺️</span>
-                </a>
+                </a> -->
                 <?php if (is_user_logged_in()) : ?>
                     <a href="<?php echo esc_url(get_edit_profile_url()); ?>" class="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center overflow-hidden">
                         <?php echo get_avatar($current_user->ID, 40, '', '', ['class' => 'w-full h-full object-cover']); ?>
@@ -333,8 +339,32 @@ $user_name = $current_user->ID ? $current_user->display_name : __('Explorer', 'c
 
 </main>
 
+<?php get_template_part('template-parts/component-recommender-quiz-modal'); ?>
+
 <script>
 document.addEventListener('DOMContentLoaded', function() {
+    // Quiz modal
+    const quizModal = document.getElementById('cg-quiz-modal');
+    const openQuizBtn = document.getElementById('cg-open-quiz');
+    const closeQuizBtn = document.getElementById('cg-close-quiz');
+
+    function openQuiz() {
+        quizModal?.classList.remove('hidden');
+        document.body.classList.add('cg-modal-open');
+    }
+    function closeQuiz() {
+        quizModal?.classList.add('hidden');
+        document.body.classList.remove('cg-modal-open');
+    }
+
+    openQuizBtn?.addEventListener('click', openQuiz);
+    closeQuizBtn?.addEventListener('click', closeQuiz);
+    quizModal?.addEventListener('click', (e) => {
+        if (e.target.classList.contains('cg-modal-overlay')) {
+            closeQuiz();
+        }
+    });
+
     // Category filter buttons
     const categoryBtns = document.querySelectorAll('.cg-category-btn');
     
@@ -609,6 +639,41 @@ document.addEventListener('DOMContentLoaded', function() {
 
 .cg-category-btn.active .cg-category-label {
     color: #1f3f46;
+}
+
+/* Modal */
+.cg-modal {
+    position: fixed;
+    inset: 0;
+    z-index: 60;
+}
+.cg-modal-overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(0,0,0,0.45);
+    backdrop-filter: blur(4px);
+}
+.cg-modal-content {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: #fffdf9;
+    border-radius: 1.5rem;
+    border: 1px solid rgba(251, 191, 36, 0.35);
+    box-shadow: 0 25px 60px rgba(0,0,0,0.12);
+    width: min(720px, 94vw);
+    max-height: 88vh;
+    overflow-y: auto;
+    padding: 1.25rem;
+    z-index: 1;
+}
+
+body.cg-modal-open {
+    overflow: hidden;
+}
+.cg-modal.hidden {
+    display: none;
 }
 </style>
 
