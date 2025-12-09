@@ -103,7 +103,7 @@ body {
     font-family: 'Noto Sans Display', system-ui, -apple-system, sans-serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
-    background: linear-gradient(135deg, #fef7ed 0%, #fed7aa 50%, #ffedd5 100%);
+    background: linear-gradient(130deg, #fff9f2 0%, #fff3e0 45%, #ffe7d0 100%);
     min-height: 100vh;
 }
 

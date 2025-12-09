@@ -74,7 +74,7 @@ if (!empty($_GET['price']) && current_user_can('manage_options')) {
                     </p>
                 <?php else : ?>
                     <h1 class="text-4xl md:text-5xl font-bold mb-3 drop-shadow-lg">
-                        🌴 <?php esc_html_e('Locations in Capiz', 'capiznon-geo'); ?> 🌴
+                        🌴 <?php esc_html_e('Locations in Capiz', 'capiznon-geo'); ?> 🌊
                     </h1>
                     <p class="text-amber-50 text-xl max-w-2xl mx-auto">
                         <?php 

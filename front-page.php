@@ -13,7 +13,7 @@ $current_user = wp_get_current_user();
 $user_name = $current_user->ID ? $current_user->display_name : __('Explorer', 'capiznon-geo');
 ?>
 
-<main id="main" class="flex-1 bg-white min-h-screen">
+<main id="main" class="flex-1 min-h-screen bg-white/70 backdrop-blur-sm">
     
     <div class="max-w-7xl mx-auto w-full sm:px-2 lg:px-4">
         <!-- Header Section -->
@@ -72,36 +72,36 @@ $user_name = $current_user->ID ? $current_user->display_name : __('Explorer', 'c
                 View all
             </a>
         </div>
-        <div class="flex gap-4 overflow-x-auto pb-4">
-            <button type="button" data-type="" class="cg-category-btn active flex flex-col items-center gap-2 flex-shrink-0">
-                <div class="w-14 h-14 bg-gray-900 rounded-xl flex items-center justify-center transition-colors">
-                    <span class="text-xl text-white">✨</span>
+        <div class="cg-category-row">
+            <button type="button" data-type="" class="cg-category-btn active">
+                <div class="cg-category-card">
+                    <span class="text-xl">✨</span>
                 </div>
-                <span class="text-xs font-medium text-gray-900">All</span>
+                <span class="cg-category-label">All</span>
             </button>
-            <button type="button" data-type="food-dining" class="cg-category-btn flex flex-col items-center gap-2 flex-shrink-0">
-                <div class="w-14 h-14 bg-gray-100 rounded-xl flex items-center justify-center hover:bg-gray-200 transition-colors">
+            <button type="button" data-type="food-dining" class="cg-category-btn">
+                <div class="cg-category-card">
                     <span class="text-xl">🍽️</span>
                 </div>
-                <span class="text-xs font-medium text-gray-600">Food</span>
+                <span class="cg-category-label">Food</span>
             </button>
-            <button type="button" data-type="accommodation" class="cg-category-btn flex flex-col items-center gap-2 flex-shrink-0">
-                <div class="w-14 h-14 bg-gray-100 rounded-xl flex items-center justify-center hover:bg-gray-200 transition-colors">
+            <button type="button" data-type="accommodation" class="cg-category-btn">
+                <div class="cg-category-card">
                     <span class="text-xl">🏨</span>
                 </div>
-                <span class="text-xs font-medium text-gray-600">Stay</span>
+                <span class="cg-category-label">Stay</span>
             </button>
-            <button type="button" data-type="attractions" class="cg-category-btn flex flex-col items-center gap-2 flex-shrink-0">
-                <div class="w-14 h-14 bg-gray-100 rounded-xl flex items-center justify-center hover:bg-gray-200 transition-colors">
+            <button type="button" data-type="attractions" class="cg-category-btn">
+                <div class="cg-category-card">
                     <span class="text-xl">⭐</span>
                 </div>
-                <span class="text-xs font-medium text-gray-600">See</span>
+                <span class="cg-category-label">See</span>
             </button>
-            <button type="button" data-type="shopping" class="cg-category-btn flex flex-col items-center gap-2 flex-shrink-0">
-                <div class="w-14 h-14 bg-gray-100 rounded-xl flex items-center justify-center hover:bg-gray-200 transition-colors">
+            <button type="button" data-type="shopping" class="cg-category-btn">
+                <div class="cg-category-card">
                     <span class="text-xl">🛍️</span>
                 </div>
-                <span class="text-xs font-medium text-gray-600">Shop</span>
+                <span class="cg-category-label">Shop</span>
             </button>
         </div>
     </div>
@@ -344,21 +344,7 @@ document.addEventListener('DOMContentLoaded', function() {
             
             // Update active state
             categoryBtns.forEach(b => {
-                const icon = b.querySelector('div');
-                const label = b.querySelector('span:last-child');
-                if (b === this) {
-                    b.classList.add('active');
-                    icon.classList.remove('bg-white/90', 'border', 'border-stone-100/80');
-                    icon.classList.add('bg-gradient-to-br', 'from-amber-200/90', 'to-orange-200/90');
-                    label.classList.remove('text-stone-500');
-                    label.classList.add('text-stone-600');
-                } else {
-                    b.classList.remove('active');
-                    icon.classList.add('bg-white/90', 'border', 'border-stone-100/80');
-                    icon.classList.remove('bg-gradient-to-br', 'from-amber-200/90', 'to-orange-200/90');
-                    label.classList.add('text-stone-500');
-                    label.classList.remove('text-stone-600');
-                }
+                b.classList.toggle('active', b === this);
             });
             
             // Filter sections based on type
@@ -488,7 +474,7 @@ document.addEventListener('DOMContentLoaded', function() {
 </script>
 
 <style>
-/* Carousel container - hide scrollbar completely */
+/* Carousel container - hide scrollbar completely (kept for Near Me) */
 .cg-carousel {
     display: flex;
     gap: 1.25rem;
@@ -498,14 +484,15 @@ document.addEventListener('DOMContentLoaded', function() {
     scroll-snap-type: x mandatory;
     scroll-behavior: smooth;
     -webkit-overflow-scrolling: touch;
-    
-    /* Hide scrollbar - all browsers */
     scrollbar-width: none; /* Firefox */
     -ms-overflow-style: none; /* IE/Edge */
 }
 
 @media (min-width: 640px) {
     .cg-carousel {
+        padding-left: 2rem;
+        padding-right: 2rem;
+    }
 }
 
 .cg-carousel::-webkit-scrollbar {
@@ -517,13 +504,111 @@ document.addEventListener('DOMContentLoaded', function() {
     scroll-snap-align: start;
 }
 
-/* Category button active state */
-.cg-category-btn.active > div:first-child {
-    background-color: rgb(17 24 39);
+/* Responsive grids for featured/sections */
+.cg-grid {
+    display: grid;
+    gap: 1.25rem;
+    padding: 0.5rem 1.5rem 1.5rem 1.5rem;
 }
 
-.cg-category-btn.active > span:last-child {
-    color: rgb(17 24 39);
+.cg-grid-featured {
+    grid-template-columns: repeat(1, minmax(0, 1fr));
+}
+
+.cg-grid-standard {
+    grid-template-columns: repeat(1, minmax(0, 1fr));
+}
+
+@media (min-width: 640px) {
+    .cg-grid-featured {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+    .cg-grid-standard {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (min-width: 1024px) {
+    .cg-grid-featured {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+    .cg-grid-standard {
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+}
+
+.cg-card {
+    width: 100%;
+}
+
+.cg-carousel .cg-card {
+    min-width: 16rem;
+    max-width: 18rem;
+}
+
+/* Category quick filters */
+.cg-category-row {
+    display: flex;
+    gap: 0.75rem;
+    overflow-x: auto;
+    padding-bottom: 0.5rem;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+}
+.cg-category-row::-webkit-scrollbar { display: none; }
+
+@media (min-width: 1024px) {
+    .cg-category-row {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+        gap: 1rem;
+        overflow: visible;
+    }
+}
+
+.cg-category-btn {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 0.55rem;
+    align-items: flex-start;
+    padding: 0.15rem;
+    border-radius: 1rem;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.cg-category-btn:hover {
+    transform: translateY(-1px);
+}
+
+.cg-category-card {
+    width: 100%;
+    min-height: 3.75rem;
+    border-radius: 1rem;
+    background: linear-gradient(135deg, #e7f1f3, #dce8ea);
+    border: 1px solid rgba(59, 130, 146, 0.25);
+    display: grid;
+    place-items: center;
+    box-shadow: 0 8px 20px rgba(59, 130, 146, 0.08);
+    transition: all 0.2s ease;
+    color: #35555c;
+}
+
+.cg-category-label {
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: #3a5961;
+}
+
+.cg-category-btn.active .cg-category-card {
+    background: linear-gradient(135deg, #9bd6da, #7fbfc5);
+    color: #fff;
+    border-color: rgba(59, 130, 146, 0.4);
+    box-shadow: 0 10px 24px rgba(59, 130, 146, 0.18);
+}
+
+.cg-category-btn.active .cg-category-label {
+    color: #1f3f46;
 }
 </style>
 

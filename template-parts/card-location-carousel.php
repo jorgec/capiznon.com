@@ -20,8 +20,8 @@ $areas = get_the_terms($post_id, 'location_area');
 $area_name = $areas && !is_wp_error($areas) ? $areas[0]->name : '';
 ?>
 
-<a href="<?php the_permalink(); ?>" class="w-64 group">
-    <div class="bg-white border border-gray-200 rounded-lg overflow-hidden hover:border-gray-300 transition-colors">
+<a href="<?php the_permalink(); ?>" class="group cg-card">
+    <div class="bg-white border border-gray-200 rounded-lg overflow-hidden hover:border-gray-300 transition-colors h-full flex flex-col">
         <!-- Image -->
         <div class="aspect-video relative overflow-hidden bg-gray-100">
             <?php if (has_post_thumbnail()) : ?>
@@ -40,12 +40,12 @@ $area_name = $areas && !is_wp_error($areas) ? $areas[0]->name : '';
         </div>
         
         <!-- Content -->
-        <div class="p-4">
+        <div class="p-4 flex-1 flex flex-col">
             <h3 class="font-medium text-gray-900 text-sm line-clamp-2">
                 <?php the_title(); ?>
             </h3>
             
-            <div class="flex items-center justify-between mt-2">
+            <div class="flex items-center justify-between mt-auto pt-2">
                 <?php if ($type_name) : ?>
                     <span class="text-xs text-gray-500"><?php echo esc_html($type_name); ?></span>
                 <?php endif; ?>

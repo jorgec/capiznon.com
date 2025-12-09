@@ -53,8 +53,8 @@
                         <a href="<?php echo esc_url(home_url('/')); ?>" class="flex items-center gap-3 group">
                             <!-- Bohemian Beach Logo -->
                             <div class="relative w-11 h-11">
-                                <div class="absolute inset-0 bg-gradient-to-br from-amber-400 to-orange-400 rounded-xl rotate-3 group-hover:rotate-6 transition-transform"></div>
-                                <div class="absolute inset-0.5 bg-gradient-to-br from-amber-500 to-orange-500 rounded-xl flex items-center justify-center -rotate-3 group-hover:rotate-0 transition-transform">
+                                <div class="absolute inset-0 bg-gradient-to-br from-amber-200 to-orange-200 rounded-xl rotate-3 group-hover:rotate-6 transition-transform"></div>
+                                <div class="absolute inset-0.5 bg-gradient-to-br from-amber-300 to-orange-300 rounded-xl flex items-center justify-center -rotate-3 group-hover:rotate-0 transition-transform">
                                     <span class="text-2xl text-white">🏝️</span>
                                 </div>
                                 <!-- Decorative element -->
@@ -96,7 +96,7 @@
                 <!-- Mobile Menu Button -->
                 <button type="button" id="mobile-menu-toggle" class="md:hidden p-2.5 rounded-xl text-amber-800 hover:text-amber-600 hover:bg-amber-100 transition-all">
                     <span class="sr-only"><?php esc_html_e('Open menu', 'capiznon-geo'); ?></span>
-                    <span class="text-2xl">🏝️</span>
+                    <span class="text-2xl">🌊</span>
                 </button>
             </div>
         </div>
@@ -125,7 +125,7 @@
                 
                 <!-- Mobile CTA -->
                 <a href="<?php echo esc_url(get_post_type_archive_link('cg_location')); ?>" class="block mt-3 px-4 py-3 bg-gradient-to-r from-amber-500 to-orange-500 text-white text-center font-bold rounded-xl">
-                    🌊 <?php esc_html_e('Explore Paradise', 'capiznon-geo'); ?>
+                    🌊 <?php esc_html_e('Explore', 'capiznon-geo'); ?>
                 </a>
             </div>
         </div>
